@@ -15,7 +15,7 @@ The project is ideal for those who are interested in robotics, computer vision, 
 
 - python 3
 - numpy
-- dronekit
+- ros2 foxy
     
 ## Authors
 
