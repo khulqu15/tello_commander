@@ -3,6 +3,7 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, PoseStamped
+from nav_msgs.msg import Odometry
 from tello_msgs.srv import TelloAction
 import time
 
@@ -11,20 +12,15 @@ class TelloCommander(Node):
         super().__init__('tello_commander')
         self.cmd_vel_publisher = self.create_publisher(Twist, '/drone1/cmd_vel', 10)
         self.service_client = self.create_client(TelloAction, '/drone1/tello_action')
+        self.odom_subscriber = self.create_subscription(Odometry, '/drone1/odom', self.odom_callback, 10)
+        self.pose_subscriber = self.create_subscription(PoseStamped, '/drone1/pose', self.pose_callback, 10)
         self.speed = 0.5
         self.turn = 1.5
-        self.pose_subscriber = self.create_subscription(PoseStamped, '/drone1/pose', self.pose_callback, 10)
-        # self.x = 0.0
-        # self.y = 0.0
-        # self.z = 0.0
-        # self.th = 0.0
-        # self.status = 0.0
-
-    def pose_callback(self, msg):
-        x = msg.pose.position.x
-        y = msg.pose.position.y
-        z = msg.pose.position.z
-        self.get_logger().info("Drone postion: x={x}, y={y}, z={z}")
+        self.x = 0.0
+        self.y = 0.0
+        self.z = 0.0
+        self.th = 0.0
+        self.status = 0.0
 
     def send_cmd_vel(self, linear_x=0.0, linear_y=0.0, linear_z=0.0, angular_x=0.0, angular_y=0.0, angular_z=0.0):
         msg = Twist()
@@ -37,8 +33,8 @@ class TelloCommander(Node):
         self.cmd_vel_publisher.publish(msg)
 
     def call_tello_action(self, command):
-        while not self.service_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('Waiting for service...')
+        # while not self.service_client.wait_for_service(timeout_sec=1.0):
+        #     self.get_logger().info('Waiting for service...')
         request = TelloAction.Request()
         request.cmd = command
         future = self.service_client.call_async(request)
@@ -68,6 +64,29 @@ class TelloCommander(Node):
         self.fly_forward_and_turn()
         time.sleep(4)
         self.call_tello_action('land')
+
+    def odom_callback(self, msg):
+        self.x = msg.pose.pose.position.x
+        self.y = msg.pose.pose.position.y
+        self.z = msg.pose.pose.position.z
+        self.th = msg.pose.pose.orientation.z
+
+    def pose_callback(self, msg):
+        self.status = msg.header.stamp.sec
+
+    def print_info(self):
+        self.get_logger().info(f'Location: ({self.x}, {self.y}, {self.z}), Orientation: {self.th}, Status: {self.status}')
+
+    def run(self):
+        self.call_tello_action('takeoff')
+        time.sleep(4)
+        self.print_info()
+        self.fly_forward_and_turn()
+        time.sleep(4)
+        self.print_info()
+        self.call_tello_action('land')
+        self.print_info()
+
 
 def main(args=None):
     rclpy.init(args=args)
