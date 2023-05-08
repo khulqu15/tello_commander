@@ -7,7 +7,7 @@ from nav_msgs.msg import Odometry
 from tello_msgs.srv import TelloAction
 import time
 import math
-import matplotlib.pyplot as pltr    
+import matplotlib.pyplot as plt
 import random
 from mpl_toolkits.mplot3d import axes3d
 import csv
@@ -27,6 +27,7 @@ class TelloCommander(Node):
         self.y = 0.0
         self.z = 0.0
         self.th = 0.0
+        self.altitude = 2
         self.uwb_x = 0.0
         self.uwb_y = 0.0
         self.uwb_z = 0.0
@@ -38,6 +39,7 @@ class TelloCommander(Node):
         self.uwb_x_history = []
         self.uwb_y_history = []
         self.uwb_z_history = []
+        self.distance_history = []
         
     def log_data(self):
         self.x_history.append(self.x)
@@ -47,11 +49,13 @@ class TelloCommander(Node):
         self.uwb_x_history.append(self.uwb_x)
         self.uwb_y_history.append(self.uwb_y)
         self.uwb_z_history.append(self.uwb_z)
+        distance = math.sqrt((self.x - self.uwb_x)**2 + (self.y - self.uwb_y)**2 + (self.z - self.uwb_z)**2)
+        self.distance_history.append(distance)
 
     def save_to_csv(self, file_name='drone_trajectory_data.csv'):
         with open(file_name, mode="w", newline="") as csv_file:
             csv_writer = csv.writer(csv_file)
-            csv_writer.writerow(["x", "y", "z", "th", "uwb_x", "uwb_y", "uwb_z"])
+            csv_writer.writerow(["x", "y", "z", "th", "uwb_x", "uwb_y", "uwb_z", "potential diff"])
             for i in range(len(self.x_history)):
                 csv_writer.writerow([
                     self.x_history[i],
@@ -60,23 +64,29 @@ class TelloCommander(Node):
                     self.th_history[i],
                     self.uwb_x_history[i],
                     self.uwb_y_history[i],
-                    self.uwb_z_history[i]
+                    self.uwb_z_history[i],
+                    self.distance_history[i]
                 ])
+
     
     def calculate_uwb(self):
         A = (5, -4)
         B = (1, -2)
         C = (5, 4)
-        self.uwb_x = self.x - (random.randint(0, 3) / 10)
-        self.uwb_y = self.y - (random.randint(0, 3) / 10)
-        self.uwb_z = self.z - (random.randint(0, 3) / 10)
+        self.uwb_x = self.x - (random.randint(-2, 3) / 100)
+        self.uwb_y = self.y - (random.randint(-2, 3) / 100)
+        self.uwb_z = self.z - (random.randint(-2, 3) / 100)
         self.uwb_x_history.append(self.uwb_x)
         self.uwb_y_history.append(self.uwb_y)
         self.uwb_z_history.append(self.uwb_z)
+        distance = math.sqrt((self.x - self.uwb_x)**2 + (self.y - self.uwb_y)**2 + (self.z - self.uwb_z)**2)
+        self.distance_history.append(distance)
 
     def send_cmd_vel(self, linear_x=0.0, linear_y=0.0, linear_z=0.0, angular_x=0.0, angular_y=0.0, angular_z=0.0):
         msg = Twist()
+        # msg.linear.x = (linear_x + random.uniform(-0.1, 0.1)) * self.speed
         msg.linear.x = linear_x * self.speed
+        # msg.linear.y = (linear_y + random.uniform(-0.1, 0.1)) * self.speed
         msg.linear.y = linear_y * self.speed
         msg.linear.z = linear_z * self.speed
         msg.angular.x = angular_x * self.turn
@@ -96,38 +106,43 @@ class TelloCommander(Node):
 
     def fly_forward_and_turn(self):
         self.send_cmd_vel(linear_y=-1)
+        rclpy.spin_once(self, timeout_sec=5)
         self.print_info()
         self.get_logger().info('Flying forward and left...')
         self.log_data()
-        time.sleep(3)
+        time.sleep(self.altitude)
         rclpy.spin_once(self, timeout_sec=5)
         self.print_info()
         self.send_cmd_vel(linear_x=1)
+        rclpy.spin_once(self, timeout_sec=5)
         self.log_data()
-        time.sleep(2)
+        time.sleep(self.altitude)
         rclpy.spin_once(self, timeout_sec=5)
         self.get_logger().info('Get data 200 times...')
-        for i in range(50):
+        for i in range(1):
             self.get_logger().info(f'Get data flight: ({i})')
             self.print_info()
-            self.send_cmd_vel(linear_y=1, linear_z=0.1 + (random.randint(-4, 4) / 100))
+            self.send_cmd_vel(linear_y=-1)
+            rclpy.spin_once(self, timeout_sec=5)
             self.log_data()
-            time.sleep(1)
+            time.sleep(self.altitude)
             rclpy.spin_once(self, timeout_sec=5)
             self.print_info()
             self.send_cmd_vel(linear_x=1)
+            rclpy.spin_once(self, timeout_sec=5)
             self.log_data()
-            time.sleep(1 + (i / 200))
+            time.sleep(self.altitude)
             rclpy.spin_once(self, timeout_sec=5)
             self.print_info()
-            self.send_cmd_vel(linear_y=-1)
+            self.send_cmd_vel(linear_y=1)
+            rclpy.spin_once(self, timeout_sec=5)
             self.log_data()
-            time.sleep(1)
+            time.sleep(self.altitude)
             rclpy.spin_once(self, timeout_sec=5)
             self.print_info()
             self.send_cmd_vel(linear_x=-1)
             self.log_data()
-            time.sleep(1)
+            time.sleep(self.altitude)
             rclpy.spin_once(self, timeout_sec=5)
             # if keyboard.is_pressed('q'):
             #     print("q key pressed, breaking the loop...")
@@ -140,7 +155,7 @@ class TelloCommander(Node):
     def odom_callback(self, msg):
         self.x = msg.pose.pose.position.x
         self.y = msg.pose.pose.position.y
-        self.z = msg.pose.pose.position.z
+        self.z = msg.pose.pose.position.z - 0.5
         self.th = msg.pose.pose.orientation.z
         self.x_history.append(self.x)
         self.y_history.append(self.y)
@@ -156,14 +171,15 @@ class TelloCommander(Node):
 
     def run(self):
         self.log_data()
-        self.call_tello_action('takeoff')
         rclpy.spin_once(self, timeout_sec=5)
+        self.call_tello_action('takeoff')
         self.log_data()
-        time.sleep(5)
+        time.sleep(self.altitude)
         self.print_info()
+        rclpy.spin_once(self, timeout_sec=5)
         self.fly_forward_and_turn()
         self.log_data()
-        time.sleep(5)
+        time.sleep(self.altitude)
         self.print_info()
         self.call_tello_action('land')
         self.log_data()
@@ -171,9 +187,9 @@ class TelloCommander(Node):
         self.print_info()
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
-        ax.plot(self.x_history, self.y_history, self.z_history, label="Copter Trajectory (Actual)")
-        ax.plot(self.uwb_x_history, self.uwb_y_history, self.uwb_z_history, label="Copter Trajectory (UWB)", color="green")
-        ax.quiver(self.x_history, self.y_history, self.z_history, 0, 0, self.th_history, length=0.1, normalize=True, color="red", label="Drone Yaw Orientation")
+        ax.plot(self.x_history, self.y_history, self.z_history, label="Copter Position (Actual)")
+        ax.plot(self.uwb_x_history, self.uwb_y_history, self.uwb_z_history, label="Copter Position (Estimation)", color="green")
+        ax.quiver(self.x_history, self.y_history, self.z_history, 0, 0, self.th_history, length=0.1, normalize=True, color="red", label="Copter Yaw Orientation")
         ax.set_xlabel('X Position')
         ax.set_ylabel('Y Position')
         ax.set_zlabel('Z Position')

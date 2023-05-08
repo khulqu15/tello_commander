@@ -7,10 +7,12 @@ from nav_msgs.msg import Odometry
 from tello_msgs.srv import TelloAction
 import time
 import math
-import matplotlib.pyplot as pltr    
+import matplotlib.pyplot as plt
 import random
 from mpl_toolkits.mplot3d import axes3d
 import csv
+from pykalman import KalmanFilter
+import numpy as np
 # import keyboard
 
 class TelloCommander(Node):
@@ -38,7 +40,51 @@ class TelloCommander(Node):
         self.uwb_x_history = []
         self.uwb_y_history = []
         self.uwb_z_history = []
+        self.kx = 1.0 # gain for position error
+        self.kv = 1.0 # gain for velocity error
+        self.xd = 0.0 # desired x position
+        self.yd = 0.0 # desired y position
+        self.zd = 0.0 # desired z position
+        self.vxd = 0.0 # desired x velocity
+        self.vyd = 0.0 # desired y velocity
+        self.vzd = 0.0 # desired z velocity
+        self.u1 = 0.0 # thrust command
+        self.u2 = 0.0 # roll command
+        self.u3 = 0.0 # pitch command
+        self.u4 = 0.0 # yaw command
+        self.kf = KalmanFilter(
+            transition_matrices=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+            observation_matrices=[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+            initial_state_mean=[0, 0, 0, 0],
+            initial_state_covariance=np.eye(4),
+            transition_covariance=0.1 * np.eye(4),
+            observation_covariance=0.1 * np.eye(4)
+        )
+        self.state = np.zeros(4)
         
+    def sliding_mode_control(self):
+        ex = self.xd - self.x
+        ey = self.yd - self.y
+        ez = self.zd - self.z
+        evx = self.vxd - self.vx
+        evy = self.vyd - self.vy
+        evz = self.vzd - self.vz
+
+        self.u1 = self.kx*ex + self.kv*evx
+        self.u2 = (self.kx*ey + self.kv*evy) / self.u1
+        self.u3 = (self.kx*ez + self.kv*evz) / self.u1
+        self.u4 = self.th
+        self.send_cmd_vel(linear_x=self.u1, linear_y=self.u2, linear_z=self.u3, angular_z=self.u4)
+
+    def fly_to_position(self, x, y, z):
+        self.xd = x
+        self.yd = y
+        self.zd = z
+        for i in range(10):
+            self.sliding_mode_control()
+            rclpy.spin_once(self, timeout_sec=0.1)
+            time.sleep(20)
+
     def log_data(self):
         self.x_history.append(self.x)
         self.y_history.append(self.y)
@@ -107,32 +153,10 @@ class TelloCommander(Node):
         time.sleep(2)
         rclpy.spin_once(self, timeout_sec=5)
         self.get_logger().info('Get data 200 times...')
-        for i in range(50):
-            self.get_logger().info(f'Get data flight: ({i})')
-            self.print_info()
-            self.send_cmd_vel(linear_y=1, linear_z=0.1 + (random.randint(-4, 4) / 100))
-            self.log_data()
-            time.sleep(1)
-            rclpy.spin_once(self, timeout_sec=5)
-            self.print_info()
-            self.send_cmd_vel(linear_x=1)
-            self.log_data()
-            time.sleep(1 + (i / 200))
-            rclpy.spin_once(self, timeout_sec=5)
-            self.print_info()
-            self.send_cmd_vel(linear_y=-1)
-            self.log_data()
-            time.sleep(1)
-            rclpy.spin_once(self, timeout_sec=5)
-            self.print_info()
-            self.send_cmd_vel(linear_x=-1)
-            self.log_data()
-            time.sleep(1)
-            rclpy.spin_once(self, timeout_sec=5)
-            # if keyboard.is_pressed('q'):
-            #     print("q key pressed, breaking the loop...")
-            #     break
-            
+        self.fly_to_position(0, -1, 1.5)
+        self.fly_to_position(2, -1, 1.5)
+        self.fly_to_position(2, 1, 1.5)
+        self.fly_to_position(0, 1, 1.5)
         self.send_cmd_vel()
         self.get_logger().info('Stopping...')
         rclpy.spin_once(self, timeout_sec=5)
@@ -142,6 +166,7 @@ class TelloCommander(Node):
         self.y = msg.pose.pose.position.y
         self.z = msg.pose.pose.position.z
         self.th = msg.pose.pose.orientation.z
+        self.state = self.kf.filter_update(self.state, np.array([self.x, self.y, self.z, self.th]))[0]
         self.x_history.append(self.x)
         self.y_history.append(self.y)
         self.z_history.append(self.z)
