@@ -9,13 +9,13 @@ from launch.actions import ExecuteProcess
 
 def generate_launch_description():
     # 1 or more drones:
-    drones = ['drone1', 'drone2', 'drone3', 'drone4']
+    drones = ['drone1', 'drone2', 'drone3', 'drone4', 'drone5']
     #drones = ['drone1']
 
     tello_gazebo_path = get_package_share_directory('tello_gazebo')
     tello_description_path = get_package_share_directory('tello_description')
 
-    world_path = os.path.join(tello_gazebo_path, 'worlds', 'fiducial.world')
+    world_path = os.path.join(tello_gazebo_path, 'worlds', 'multiple.world')
     map_path = os.path.join(tello_gazebo_path, 'worlds', 'fiducial_map.yaml')
 
     # Global entities
@@ -35,7 +35,8 @@ def generate_launch_description():
         ["0", "0"],
         ["0", "10"],
         ["10", "10"],
-        ["10", "0"]
+        ["10", "0"],
+        ["5", "5"]
     ]
 
     # Per-drone entities
