@@ -50,7 +50,8 @@ class TelloCommander(Node):
             'uwb_y': 0.0,
             'uwb_z': 0.0,
             'status': 0.0,
-            'speed': 2,
+            'speed': 2.0,
+            'speed_history': [],
             'turn': 1.5,
             'x_history': [],
             'y_history': [],
@@ -60,8 +61,14 @@ class TelloCommander(Node):
             'uwb_y_history': [],
             'uwb_z_history': [],
             'distance_history': [],
-            'velocity': [{ 'x': 0.0, 'y': 0.0, 'z': 0.0 }],
-            'acceleration': [{ 'x': 0.0, 'y': 0.0, 'z': 0.0 }],
+            'velocity': [],
+            'velocity_x': [],
+            'velocity_y': [],
+            'velocity_z': [],
+            'acceleration': [],
+            'acceleration_x': [],
+            'acceleration_y': [],
+            'acceleration_z': [],
             'time': 0,
         }
         self.drone2_location = {
@@ -73,7 +80,8 @@ class TelloCommander(Node):
             'uwb_y': 0.0,
             'uwb_z': 0.0,
             'status': 0.0,
-            'speed': 2,
+            'speed': 2.0,
+            'speed_history': [],
             'turn': 1.5,
             'x_history': [],
             'y_history': [],
@@ -83,8 +91,14 @@ class TelloCommander(Node):
             'uwb_y_history': [],
             'uwb_z_history': [],
             'distance_history': [],
-            'velocity': [{ 'x': 0.0, 'y': 0.0, 'z': 0.0 }],
-            'acceleration': [{ 'x': 0.0, 'y': 0.0, 'z': 0.0 }],
+            'velocity': [],
+            'velocity_x': [],
+            'velocity_y': [],
+            'velocity_z': [],
+            'acceleration': [],
+            'acceleration_x': [],
+            'acceleration_y': [],
+            'acceleration_z': [],
             'time': 0,
         }
         self.drone3_location = {
@@ -96,7 +110,8 @@ class TelloCommander(Node):
             'uwb_y': 0.0,
             'uwb_z': 0.0,
             'status': 0.0,
-            'speed': 2,
+            'speed': 2.0,
+            'speed_history': [],
             'turn': 1.5,
             'x_history': [],
             'y_history': [],
@@ -106,8 +121,14 @@ class TelloCommander(Node):
             'uwb_y_history': [],
             'uwb_z_history': [],
             'distance_history': [],
-            'velocity': [{ 'x': 0.0, 'y': 0.0, 'z': 0.0 }],
-            'acceleration': [{ 'x': 0.0, 'y': 0.0, 'z': 0.0 }],
+            'velocity': [],
+            'velocity_x': [],
+            'velocity_y': [],
+            'velocity_z': [],
+            'acceleration': [],
+            'acceleration_x': [],
+            'acceleration_y': [],
+            'acceleration_z': [],
             'time': 0,
         }
         self.drone4_location = {
@@ -119,7 +140,8 @@ class TelloCommander(Node):
             'uwb_y': 0.0,
             'uwb_z': 0.0,
             'status': 0.0,
-            'speed': 2,
+            'speed': 2.0,
+            'speed_history': [],
             'turn': 1.5,
             'x_history': [],
             'y_history': [],
@@ -129,8 +151,14 @@ class TelloCommander(Node):
             'uwb_y_history': [],
             'uwb_z_history': [],
             'distance_history': [],
-            'velocity': [{ 'x': 0.0, 'y': 0.0, 'z': 0.0 }],
-            'acceleration': [{ 'x': 0.0, 'y': 0.0, 'z': 0.0 }],
+            'velocity': [],
+            'velocity_x': [],
+            'velocity_y': [],
+            'velocity_z': [],
+            'acceleration': [],
+            'acceleration_x': [],
+            'acceleration_y': [],
+            'acceleration_z': [],
             'time': 0,
         }
         self.drone5_location = {
@@ -142,7 +170,8 @@ class TelloCommander(Node):
             'uwb_y': 0.0,
             'uwb_z': 0.0,
             'status': 0.0,
-            'speed': 2,
+            'speed': 2.0,
+            'speed_history': [],
             'turn': 1.5,
             'x_history': [],
             'y_history': [],
@@ -153,7 +182,13 @@ class TelloCommander(Node):
             'uwb_z_history': [],
             'distance_history': [],
             'velocity': [],
+            'velocity_x': [],
+            'velocity_y': [],
+            'velocity_z': [],
             'acceleration': [],
+            'acceleration_x': [],
+            'acceleration_y': [],
+            'acceleration_z': [],
             'time': 0,
         }
 
@@ -164,6 +199,12 @@ class TelloCommander(Node):
         self.drone1_location['y_history'].append(self.drone1_location['y'])
         self.drone1_location['z_history'].append(self.drone1_location['z'])
         self.drone1_location['th_history'].append(self.drone1_location['th'])
+        self.drone1_location['velocity_x'].append(self.drone1_location['velocity_x'][-1] if len(self.drone1_location['velocity_x']) > 1 else 0.0)
+        self.drone1_location['velocity_y'].append(self.drone1_location['velocity_y'][-1] if len(self.drone1_location['velocity_y']) > 1 else 0.0)
+        self.drone1_location['velocity_z'].append(self.drone1_location['velocity_z'][-1] if len(self.drone1_location['velocity_z']) > 1 else 0.0)
+        self.drone1_location['acceleration_x'].append(self.drone1_location['acceleration_x'][-1] if len(self.drone1_location['acceleration_x']) > 1 else 0.0)
+        self.drone1_location['acceleration_y'].append(self.drone1_location['acceleration_y'][-1] if len(self.drone1_location['acceleration_y']) > 1 else 0.0)
+        self.drone1_location['acceleration_z'].append(self.drone1_location['acceleration_z'][-1] if len(self.drone1_location['acceleration_z']) > 1 else 0.0)
         self.drone1_location['uwb_x_history'].append(self.drone1_location['uwb_x'])
         self.drone1_location['uwb_y_history'].append(self.drone1_location['uwb_y'])
         self.drone1_location['uwb_z_history'].append(self.drone1_location['uwb_z'])
@@ -174,6 +215,12 @@ class TelloCommander(Node):
         self.drone2_location['y_history'].append(self.drone2_location['y'])
         self.drone2_location['z_history'].append(self.drone2_location['z'])
         self.drone2_location['th_history'].append(self.drone2_location['th'])
+        self.drone2_location['velocity_x'].append(self.drone2_location['velocity_x'][-1] if len(self.drone2_location['velocity_x']) > 1 else 0.0)
+        self.drone2_location['velocity_y'].append(self.drone2_location['velocity_y'][-1] if len(self.drone2_location['velocity_y']) > 1 else 0.0)
+        self.drone2_location['velocity_z'].append(self.drone2_location['velocity_z'][-1] if len(self.drone2_location['velocity_z']) > 1 else 0.0)
+        self.drone2_location['acceleration_x'].append(self.drone2_location['acceleration_x'][-1] if len(self.drone2_location['acceleration_x']) > 1 else 0.0)
+        self.drone2_location['acceleration_y'].append(self.drone2_location['acceleration_y'][-1] if len(self.drone2_location['acceleration_y']) > 1 else 0.0)
+        self.drone2_location['acceleration_z'].append(self.drone2_location['acceleration_z'][-1] if len(self.drone2_location['acceleration_z']) > 1 else 0.0)
         self.drone2_location['uwb_x_history'].append(self.drone2_location['uwb_x'])
         self.drone2_location['uwb_y_history'].append(self.drone2_location['uwb_y'])
         self.drone2_location['uwb_z_history'].append(self.drone2_location['uwb_z'])
@@ -184,6 +231,12 @@ class TelloCommander(Node):
         self.drone3_location['y_history'].append(self.drone3_location['y'])
         self.drone3_location['z_history'].append(self.drone3_location['z'])
         self.drone3_location['th_history'].append(self.drone3_location['th'])
+        self.drone3_location['velocity_x'].append(self.drone3_location['velocity_x'][-1] if len(self.drone3_location['velocity_x']) > 1 else 0.0)
+        self.drone3_location['velocity_y'].append(self.drone3_location['velocity_y'][-1] if len(self.drone3_location['velocity_y']) > 1 else 0.0)
+        self.drone3_location['velocity_z'].append(self.drone3_location['velocity_z'][-1] if len(self.drone3_location['velocity_z']) > 1 else 0.0)
+        self.drone3_location['acceleration_x'].append(self.drone3_location['acceleration_x'][-1] if len(self.drone3_location['acceleration_x']) > 1 else 0.0)
+        self.drone3_location['acceleration_y'].append(self.drone3_location['acceleration_y'][-1] if len(self.drone3_location['acceleration_y']) > 1 else 0.0)
+        self.drone3_location['acceleration_z'].append(self.drone3_location['acceleration_z'][-1] if len(self.drone3_location['acceleration_z']) > 1 else 0.0)
         self.drone3_location['uwb_x_history'].append(self.drone3_location['uwb_x'])
         self.drone3_location['uwb_y_history'].append(self.drone3_location['uwb_y'])
         self.drone3_location['uwb_z_history'].append(self.drone3_location['uwb_z'])
@@ -194,6 +247,12 @@ class TelloCommander(Node):
         self.drone4_location['y_history'].append(self.drone4_location['y'])
         self.drone4_location['z_history'].append(self.drone4_location['z'])
         self.drone4_location['th_history'].append(self.drone4_location['th'])
+        self.drone4_location['velocity_x'].append(self.drone4_location['velocity_x'][-1] if len(self.drone4_location['velocity_x']) > 1 else 0.0)
+        self.drone4_location['velocity_y'].append(self.drone4_location['velocity_y'][-1] if len(self.drone4_location['velocity_y']) > 1 else 0.0)
+        self.drone4_location['velocity_z'].append(self.drone4_location['velocity_z'][-1] if len(self.drone4_location['velocity_z']) > 1 else 0.0)
+        self.drone4_location['acceleration_x'].append(self.drone4_location['acceleration_x'][-1] if len(self.drone4_location['acceleration_x']) > 1 else 0.0)
+        self.drone4_location['acceleration_y'].append(self.drone4_location['acceleration_y'][-1] if len(self.drone4_location['acceleration_y']) > 1 else 0.0)
+        self.drone4_location['acceleration_z'].append(self.drone4_location['acceleration_z'][-1] if len(self.drone4_location['acceleration_z']) > 1 else 0.0)
         self.drone4_location['uwb_x_history'].append(self.drone4_location['uwb_x'])
         self.drone4_location['uwb_y_history'].append(self.drone4_location['uwb_y'])
         self.drone4_location['uwb_z_history'].append(self.drone4_location['uwb_z'])
@@ -204,6 +263,12 @@ class TelloCommander(Node):
         self.drone5_location['y_history'].append(self.drone5_location['y'])
         self.drone5_location['z_history'].append(self.drone5_location['z'])
         self.drone5_location['th_history'].append(self.drone5_location['th'])
+        self.drone5_location['velocity_x'].append(self.drone5_location['velocity_x'][-1] if len(self.drone5_location['velocity_x']) > 1 else 0.0)
+        self.drone5_location['velocity_y'].append(self.drone5_location['velocity_y'][-1] if len(self.drone5_location['velocity_y']) > 1 else 0.0)
+        self.drone5_location['velocity_z'].append(self.drone5_location['velocity_z'][-1] if len(self.drone5_location['velocity_z']) > 1 else 0.0)
+        self.drone5_location['acceleration_x'].append(self.drone5_location['acceleration_x'][-1] if len(self.drone5_location['acceleration_x']) > 1 else 0.0)
+        self.drone5_location['acceleration_y'].append(self.drone5_location['acceleration_y'][-1] if len(self.drone5_location['acceleration_y']) > 1 else 0.0)
+        self.drone5_location['acceleration_z'].append(self.drone5_location['acceleration_z'][-1] if len(self.drone5_location['acceleration_z']) > 1 else 0.0)
         self.drone5_location['uwb_x_history'].append(self.drone5_location['uwb_x'])
         self.drone5_location['uwb_y_history'].append(self.drone5_location['uwb_y'])
         self.drone5_location['uwb_z_history'].append(self.drone5_location['uwb_z'])
@@ -212,6 +277,27 @@ class TelloCommander(Node):
 
     def save_to_csv(self, file_name='drone_trajectory_data.csv'):
         for drone, data in enumerate([self.drone1_location, self.drone2_location, self.drone3_location, self.drone4_location, self.drone5_location], start=1):
+            self.get_logger().info(f'X {drone}: {len(data["x_history"])}')
+            self.get_logger().info(f'Y {drone}: {len(data["y_history"])}')
+            self.get_logger().info(f'Z {drone}: {len(data["z_history"])}')
+            self.get_logger().info(f'TH {drone}: {len(data["th_history"])}')
+            self.get_logger().info(f'XUWB {drone}: {len(data["uwb_x_history"])}')
+            self.get_logger().info(f'YUWB {drone}: {len(data["uwb_y_history"])}')
+            self.get_logger().info(f'ZUWB {drone}: {len(data["uwb_z_history"])}')
+            self.get_logger().info(f'DIST {drone}: {len(data["distance_history"])}')
+            self.get_logger().info(f'SPEEDH {drone}: {len(data["speed_history"])}')
+            self.get_logger().info(f'VEL {drone}: {len(data["velocity"])}')
+            self.get_logger().info(f'VELX {drone}: {len(data["velocity_x"])}')
+            self.get_logger().info(f'VELY {drone}: {len(data["velocity_y"])}')
+            self.get_logger().info(f'VELZ {drone}: {len(data["velocity_z"])}')
+            self.get_logger().info(f'ACL {drone}: {len(data["acceleration"])}')
+            self.get_logger().info(f'ACLX {drone}: {len(data["acceleration_x"])}')
+            self.get_logger().info(f'ACLY {drone}: {len(data["acceleration_y"])}')
+            self.get_logger().info(f'ACLZ {drone}: {len(data["acceleration_z"])}')
+            velocity_x = [item['x'] for item in data['velocity']]
+            velocity_y = [item['y'] for item in data['velocity']]
+            velocity_z = [item['z'] for item in data['velocity']]
+
             df = pd.DataFrame({
                 "x": data['x_history'],
                 "y": data['y_history'],
@@ -220,26 +306,38 @@ class TelloCommander(Node):
                 "uwb_x": data['uwb_x_history'],
                 "uwb_y": data['uwb_y_history'],
                 "uwb_z": data['uwb_z_history'],
-                "distance": data['distance_history'],
-                "speed": data['speed'], 
-                "velocity": data['velocity'], 
-                "acceleration": data['velocity'], 
+                "velocity_x": data['velocity_x'], 
+                "velocity_y": data['velocity_y'], 
+                "velocity_z": data['velocity_z'], 
+                "acceleration_x": data['acceleration_x'], 
+                "acceleration_y": data['acceleration_y'], 
+                "acceleration_z": data['acceleration_z'], 
             })
             csv_file = f'drone{drone}_{file_name}'
             df.to_csv(csv_file, index=False)
             
     def set_drone_speed(self, drone_id, speed):
         twist = Twist()
-        twist.linear.x = speed
+        twist.linear.x = float(speed)
         if drone_id == 1:
+            self.drone1_location['speed'] = float(speed)
+            self.drone1_location['speed_history'].append(float(speed))
             self.cmd_vel_publisher1.publish(twist)
         elif drone_id == 2:
+            self.drone2_location['speed'] = float(speed)
+            self.drone2_location['speed_history'].append(float(speed))
             self.cmd_vel_publisher2.publish(twist)
         elif drone_id == 3:
+            self.drone3_location['speed'] = float(speed)
+            self.drone3_location['speed_history'].append(float(speed))
             self.cmd_vel_publisher3.publish(twist)
         elif drone_id == 4:
+            self.drone4_location['speed'] = float(speed)
+            self.drone4_location['speed_history'].append(float(speed))
             self.cmd_vel_publisher4.publish(twist)
         elif drone_id == 5:
+            self.drone5_location['speed'] = float(speed)
+            self.drone5_location['speed_history'].append(float(speed))
             self.cmd_vel_publisher5.publish(twist)
             
     def check_collisions_and_adjust_speed(self):
@@ -317,7 +415,7 @@ class TelloCommander(Node):
             msg = Twist()
             drone = drones[i]
             msg.linear.x = linear_x * drone['speed']
-            msg.linear.y = linear_y * drone['speed']
+            msg.linear.y = float(linear_y * drone['speed'])
             msg.linear.z = linear_z * drone['speed']
             msg.angular.x = angular_x * drone['turn']
             msg.angular.y = angular_y * drone['turn']
@@ -326,6 +424,7 @@ class TelloCommander(Node):
             if i+1 == 2: self.cmd_vel_publisher2.publish(msg)
             if i+1 == 4: self.cmd_vel_publisher4.publish(msg)
             if i+1 == 5: self.cmd_vel_publisher5.publish(msg)
+        self.check_collisions_and_adjust_speed()
 
     def call_tello_action(self, command):
         request = TelloAction.Request()
@@ -356,7 +455,7 @@ class TelloCommander(Node):
         time.sleep(self.altitude)
         rclpy.spin_once(self, timeout_sec=5)
         self.get_logger().info('Get data 200 times...')
-        for i in range(1):
+        for i in range(20):
             self.get_logger().info(f'Get data flight: ({i})')
             self.print_info()
             self.send_cmd_vel(linear_y=-1)
@@ -393,160 +492,275 @@ class TelloCommander(Node):
         self.drone1_location['x'] = msg.pose.pose.position.x
         self.drone1_location['y'] = msg.pose.pose.position.y
         self.drone1_location['z'] = msg.pose.pose.position.z - 0.5
-        
-        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
-        elapsed_time = self.drone1_location['time'] - self.drone1_location['prvious_time']
-        self.drone1_location['time'] = current_time
-        if len(self.drone_location['x_history']) > 0:
-            delta_x = self.drone1_location['x'] - self.drone1_location['x_history'][-1]
-            delta_y = self.drone1_location['y'] - self.drone1_location['y_history'][-1]
-            delta_z = self.drone1_location['z'] - self.drone1_location['z_history'][-1]
-            velocity_x = delta_x / elapsed_time
-            velocity_y = delta_y / elapsed_time
-            velocity_z = delta_z / elapsed_time
-            self.drone1_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
-            if len(self.drone1_location['velocity']) > 1:
-                delta_vx = self.drone1_location['velocity'][-1]['x'] - self.drone1_location['velocity'][-2]['x']
-                delta_vy = self.drone1_location['velocity'][-1]['y'] - self.drone1_location['velocity'][-2]['y']
-                delta_vz = self.drone1_location['velocity'][-1]['z'] - self.drone1_location['velocity'][-2]['z']
-                acceleration_x = delta_vx / elapsed_time
-                acceleration_y = delta_vy / elapsed_time
-                acceleration_z = delta_vz / elapsed_time
-                self.drone1_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
-        
         self.drone1_location['th'] = msg.pose.pose.orientation.z
         self.drone1_location['x_history'].append(self.drone1_location['x'])
         self.drone1_location['y_history'].append(self.drone1_location['y'])
         self.drone1_location['z_history'].append(self.drone1_location['z'])
         self.drone1_location['th_history'].append(self.drone1_location['th'])
+        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
+        elapsed_time = current_time = self.drone1_location['time']
+        self.drone1_location['time'] = current_time
+        if len(self.drone1_location['x_history']) > 0:
+            delta_x = self.drone1_location['x'] - self.drone1_location['x_history'][-1]
+            delta_y = self.drone1_location['y'] - self.drone1_location['y_history'][-1]
+            delta_z = self.drone1_location['z'] - self.drone1_location['z_history'][-1]
+            if elapsed_time > 0:
+                velocity_x = delta_x / elapsed_time
+                velocity_y = delta_y / elapsed_time
+                velocity_z = delta_z / elapsed_time
+            else :
+                velocity_x = self.drone1_location['speed']
+                velocity_y = self.drone1_location['speed']
+                velocity_z = self.drone1_location['speed']
+            self.drone1_location['velocity_x'].append(float(velocity_x))
+            self.drone1_location['velocity_y'].append(float(velocity_y))
+            self.drone1_location['velocity_z'].append(float(velocity_z))
+            self.drone1_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
+            if len(self.drone1_location['velocity']) > 1:
+                delta_vx = self.drone1_location['velocity'][-1]['x'] - self.drone1_location['velocity'][-2]['x']
+                delta_vy = self.drone1_location['velocity'][-1]['y'] - self.drone1_location['velocity'][-2]['y']
+                delta_vz = self.drone1_location['velocity'][-1]['z'] - self.drone1_location['velocity'][-2]['z']
+                acceleration_x = delta_vx / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_y = delta_vy / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_z = delta_vz / elapsed_time if elapsed_time != 0 else self.speed
+                self.drone1_location['acceleration_x'].append(float(acceleration_x))
+                self.drone1_location['acceleration_y'].append(float(acceleration_y))
+                self.drone1_location['acceleration_z'].append(float(acceleration_z))
+                self.drone1_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
+            else:
+                self.drone1_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+                self.drone1_location['acceleration_x'].append(self.speed)
+                self.drone1_location['acceleration_y'].append(self.speed)
+                self.drone1_location['acceleration_z'].append(self.speed)
+        else:
+            self.drone1_location['velocity_x'].append(self.speed)
+            self.drone1_location['velocity_y'].append(self.speed)
+            self.drone1_location['velocity_z'].append(self.speed)
+            self.drone1_location['velocity'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+            self.drone1_location['acceleration_x'].append(0.0)
+            self.drone1_location['acceleration_y'].append(0.0)
+            self.drone1_location['acceleration_z'].append(0.0)
+            self.drone1_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
         self.calculate_uwb(1)
         
     def odom_callback2(self, msg):
         self.drone2_location['x'] = msg.pose.pose.position.x
         self.drone2_location['y'] = msg.pose.pose.position.y
         self.drone2_location['z'] = msg.pose.pose.position.z - 0.5
-        
-        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
-        elapsed_time = self.drone2_location['time'] - self.drone2_location['prvious_time']
-        self.drone2_location['time'] = current_time
-        if len(self.drone_location['x_history']) > 0:
-            delta_x = self.drone2_location['x'] - self.drone2_location['x_history'][-1]
-            delta_y = self.drone2_location['y'] - self.drone2_location['y_history'][-1]
-            delta_z = self.drone2_location['z'] - self.drone2_location['z_history'][-1]
-            velocity_x = delta_x / elapsed_time
-            velocity_y = delta_y / elapsed_time
-            velocity_z = delta_z / elapsed_time
-            self.drone2_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
-            if len(self.drone2_location['velocity']) > 1:
-                delta_vx = self.drone2_location['velocity'][-1]['x'] - self.drone2_location['velocity'][-2]['x']
-                delta_vy = self.drone2_location['velocity'][-1]['y'] - self.drone2_location['velocity'][-2]['y']
-                delta_vz = self.drone2_location['velocity'][-1]['z'] - self.drone2_location['velocity'][-2]['z']
-                acceleration_x = delta_vx / elapsed_time
-                acceleration_y = delta_vy / elapsed_time
-                acceleration_z = delta_vz / elapsed_time
-                self.drone2_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
-        
         self.drone2_location['th'] = msg.pose.pose.orientation.z
         self.drone2_location['x_history'].append(self.drone2_location['x'])
         self.drone2_location['y_history'].append(self.drone2_location['y'])
         self.drone2_location['z_history'].append(self.drone2_location['z'])
         self.drone2_location['th_history'].append(self.drone2_location['th'])
+        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
+        elapsed_time = current_time = self.drone2_location['time']
+        self.drone2_location['time'] = current_time
+        if len(self.drone2_location['x_history']) > 0:
+            delta_x = self.drone2_location['x'] - self.drone2_location['x_history'][-1]
+            delta_y = self.drone2_location['y'] - self.drone2_location['y_history'][-1]
+            delta_z = self.drone2_location['z'] - self.drone2_location['z_history'][-1]
+            if elapsed_time > 0:
+                velocity_x = delta_x / elapsed_time
+                velocity_y = delta_y / elapsed_time
+                velocity_z = delta_z / elapsed_time
+            else :
+                velocity_x = self.drone2_location['speed']
+                velocity_y = self.drone2_location['speed']
+                velocity_z = self.drone2_location['speed']
+            self.drone2_location['velocity_x'].append(float(velocity_x))
+            self.drone2_location['velocity_y'].append(float(velocity_y))
+            self.drone2_location['velocity_z'].append(float(velocity_z))
+            self.drone2_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
+            if len(self.drone2_location['velocity']) > 1:
+                delta_vx = self.drone2_location['velocity'][-1]['x'] - self.drone2_location['velocity'][-2]['x']
+                delta_vy = self.drone2_location['velocity'][-1]['y'] - self.drone2_location['velocity'][-2]['y']
+                delta_vz = self.drone2_location['velocity'][-1]['z'] - self.drone2_location['velocity'][-2]['z']
+                acceleration_x = delta_vx / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_y = delta_vy / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_z = delta_vz / elapsed_time if elapsed_time != 0 else self.speed
+                self.drone2_location['acceleration_x'].append(float(acceleration_x))
+                self.drone2_location['acceleration_y'].append(float(acceleration_y))
+                self.drone2_location['acceleration_z'].append(float(acceleration_z))
+                self.drone2_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
+            else:
+                self.drone2_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+                self.drone2_location['acceleration_x'].append(self.speed)
+                self.drone2_location['acceleration_y'].append(self.speed)
+                self.drone2_location['acceleration_z'].append(self.speed)
+        else:
+            self.drone2_location['velocity_x'].append(self.speed)
+            self.drone2_location['velocity_y'].append(self.speed)
+            self.drone2_location['velocity_z'].append(self.speed)
+            self.drone2_location['velocity'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+            self.drone2_location['acceleration_x'].append(0.0)
+            self.drone2_location['acceleration_y'].append(0.0)
+            self.drone2_location['acceleration_z'].append(0.0)
+            self.drone2_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
         self.calculate_uwb(2)
         
     def odom_callback3(self, msg):
         self.drone3_location['x'] = msg.pose.pose.position.x
         self.drone3_location['y'] = msg.pose.pose.position.y
         self.drone3_location['z'] = msg.pose.pose.position.z - 0.5
-        
-        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
-        elapsed_time = self.drone3_location['time'] - self.drone3_location['prvious_time']
-        self.drone3_location['time'] = current_time
-        if len(self.drone_location['x_history']) > 0:
-            delta_x = self.drone3_location['x'] - self.drone3_location['x_history'][-1]
-            delta_y = self.drone3_location['y'] - self.drone3_location['y_history'][-1]
-            delta_z = self.drone3_location['z'] - self.drone3_location['z_history'][-1]
-            velocity_x = delta_x / elapsed_time
-            velocity_y = delta_y / elapsed_time
-            velocity_z = delta_z / elapsed_time
-            self.drone3_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
-            if len(self.drone3_location['velocity']) > 1:
-                delta_vx = self.drone3_location['velocity'][-1]['x'] - self.drone3_location['velocity'][-2]['x']
-                delta_vy = self.drone3_location['velocity'][-1]['y'] - self.drone3_location['velocity'][-2]['y']
-                delta_vz = self.drone3_location['velocity'][-1]['z'] - self.drone3_location['velocity'][-2]['z']
-                acceleration_x = delta_vx / elapsed_time
-                acceleration_y = delta_vy / elapsed_time
-                acceleration_z = delta_vz / elapsed_time
-                self.drone3_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
-        
         self.drone3_location['th'] = msg.pose.pose.orientation.z
         self.drone3_location['x_history'].append(self.drone3_location['x'])
         self.drone3_location['y_history'].append(self.drone3_location['y'])
         self.drone3_location['z_history'].append(self.drone3_location['z'])
         self.drone3_location['th_history'].append(self.drone3_location['th'])
+        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
+        elapsed_time = current_time = self.drone3_location['time']
+        self.drone3_location['time'] = current_time
+        if len(self.drone3_location['x_history']) > 0:
+            delta_x = self.drone3_location['x'] - self.drone3_location['x_history'][-1]
+            delta_y = self.drone3_location['y'] - self.drone3_location['y_history'][-1]
+            delta_z = self.drone3_location['z'] - self.drone3_location['z_history'][-1]
+            if elapsed_time > 0:
+                velocity_x = delta_x / elapsed_time
+                velocity_y = delta_y / elapsed_time
+                velocity_z = delta_z / elapsed_time
+            else :
+                velocity_x = self.drone3_location['speed']
+                velocity_y = self.drone3_location['speed']
+                velocity_z = self.drone3_location['speed']
+            self.drone3_location['velocity_x'].append(float(velocity_x))
+            self.drone3_location['velocity_y'].append(float(velocity_y))
+            self.drone3_location['velocity_z'].append(float(velocity_z))
+            self.drone3_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
+            if len(self.drone3_location['velocity']) > 1:
+                delta_vx = self.drone3_location['velocity'][-1]['x'] - self.drone3_location['velocity'][-2]['x']
+                delta_vy = self.drone3_location['velocity'][-1]['y'] - self.drone3_location['velocity'][-2]['y']
+                delta_vz = self.drone3_location['velocity'][-1]['z'] - self.drone3_location['velocity'][-2]['z']
+                acceleration_x = delta_vx / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_y = delta_vy / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_z = delta_vz / elapsed_time if elapsed_time != 0 else self.speed
+                self.drone3_location['acceleration_x'].append(float(acceleration_x))
+                self.drone3_location['acceleration_y'].append(float(acceleration_y))
+                self.drone3_location['acceleration_z'].append(float(acceleration_z))
+                self.drone3_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
+            else:
+                self.drone3_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+                self.drone3_location['acceleration_x'].append(self.speed)
+                self.drone3_location['acceleration_y'].append(self.speed)
+                self.drone3_location['acceleration_z'].append(self.speed)
+        else:
+            self.drone3_location['velocity_x'].append(self.speed)
+            self.drone3_location['velocity_y'].append(self.speed)
+            self.drone3_location['velocity_z'].append(self.speed)
+            self.drone3_location['velocity'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+            self.drone3_location['acceleration_x'].append(0.0)
+            self.drone3_location['acceleration_y'].append(0.0)
+            self.drone3_location['acceleration_z'].append(0.0)
+            self.drone3_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
         self.calculate_uwb(3)
         
     def odom_callback4(self, msg):
         self.drone4_location['x'] = msg.pose.pose.position.x
         self.drone4_location['y'] = msg.pose.pose.position.y
         self.drone4_location['z'] = msg.pose.pose.position.z - 0.5
-        
-        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
-        elapsed_time = self.drone4_location['time'] - self.drone4_location['prvious_time']
-        self.drone4_location['time'] = current_time
-        if len(self.drone_location['x_history']) > 0:
-            delta_x = self.drone4_location['x'] - self.drone4_location['x_history'][-1]
-            delta_y = self.drone4_location['y'] - self.drone4_location['y_history'][-1]
-            delta_z = self.drone4_location['z'] - self.drone4_location['z_history'][-1]
-            velocity_x = delta_x / elapsed_time
-            velocity_y = delta_y / elapsed_time
-            velocity_z = delta_z / elapsed_time
-            self.drone4_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
-            if len(self.drone4_location['velocity']) > 1:
-                delta_vx = self.drone4_location['velocity'][-1]['x'] - self.drone4_location['velocity'][-2]['x']
-                delta_vy = self.drone4_location['velocity'][-1]['y'] - self.drone4_location['velocity'][-2]['y']
-                delta_vz = self.drone4_location['velocity'][-1]['z'] - self.drone4_location['velocity'][-2]['z']
-                acceleration_x = delta_vx / elapsed_time
-                acceleration_y = delta_vy / elapsed_time
-                acceleration_z = delta_vz / elapsed_time
-                self.drone4_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
-        
         self.drone4_location['th'] = msg.pose.pose.orientation.z
         self.drone4_location['x_history'].append(self.drone4_location['x'])
         self.drone4_location['y_history'].append(self.drone4_location['y'])
         self.drone4_location['z_history'].append(self.drone4_location['z'])
         self.drone4_location['th_history'].append(self.drone4_location['th'])
+        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
+        elapsed_time = current_time = self.drone4_location['time']
+        self.drone4_location['time'] = current_time
+        if len(self.drone4_location['x_history']) > 0:
+            delta_x = self.drone4_location['x'] - self.drone4_location['x_history'][-1]
+            delta_y = self.drone4_location['y'] - self.drone4_location['y_history'][-1]
+            delta_z = self.drone4_location['z'] - self.drone4_location['z_history'][-1]
+            if elapsed_time > 0:
+                velocity_x = delta_x / elapsed_time
+                velocity_y = delta_y / elapsed_time
+                velocity_z = delta_z / elapsed_time
+            else :
+                velocity_x = self.drone4_location['speed']
+                velocity_y = self.drone4_location['speed']
+                velocity_z = self.drone4_location['speed']
+            self.drone4_location['velocity_x'].append(float(velocity_x))
+            self.drone4_location['velocity_y'].append(float(velocity_y))
+            self.drone4_location['velocity_z'].append(float(velocity_z))
+            self.drone4_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
+            if len(self.drone4_location['velocity']) > 1:
+                delta_vx = self.drone4_location['velocity'][-1]['x'] - self.drone4_location['velocity'][-2]['x']
+                delta_vy = self.drone4_location['velocity'][-1]['y'] - self.drone4_location['velocity'][-2]['y']
+                delta_vz = self.drone4_location['velocity'][-1]['z'] - self.drone4_location['velocity'][-2]['z']
+                acceleration_x = delta_vx / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_y = delta_vy / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_z = delta_vz / elapsed_time if elapsed_time != 0 else self.speed
+                self.drone4_location['acceleration_x'].append(float(acceleration_x))
+                self.drone4_location['acceleration_y'].append(float(acceleration_y))
+                self.drone4_location['acceleration_z'].append(float(acceleration_z))
+                self.drone4_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
+            else:
+                self.drone4_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+                self.drone4_location['acceleration_x'].append(self.speed)
+                self.drone4_location['acceleration_y'].append(self.speed)
+                self.drone4_location['acceleration_z'].append(self.speed)
+        else:
+            self.drone4_location['velocity_x'].append(self.speed)
+            self.drone4_location['velocity_y'].append(self.speed)
+            self.drone4_location['velocity_z'].append(self.speed)
+            self.drone4_location['velocity'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+            self.drone4_location['acceleration_x'].append(0.0)
+            self.drone4_location['acceleration_y'].append(0.0)
+            self.drone4_location['acceleration_z'].append(0.0)
+            self.drone4_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
         self.calculate_uwb(4)
         
     def odom_callback5(self, msg):
         self.drone5_location['x'] = msg.pose.pose.position.x
         self.drone5_location['y'] = msg.pose.pose.position.y
         self.drone5_location['z'] = msg.pose.pose.position.z - 0.5
-        
-        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
-        elapsed_time = self.drone5_location['time'] - self.drone5_location['prvious_time']
-        self.drone5_location['time'] = current_time
-        if len(self.drone_location['x_history']) > 0:
-            delta_x = self.drone5_location['x'] - self.drone5_location['x_history'][-1]
-            delta_y = self.drone5_location['y'] - self.drone5_location['y_history'][-1]
-            delta_z = self.drone5_location['z'] - self.drone5_location['z_history'][-1]
-            velocity_x = delta_x / elapsed_time
-            velocity_y = delta_y / elapsed_time
-            velocity_z = delta_z / elapsed_time
-            self.drone5_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
-            if len(self.drone5_location['velocity']) > 1:
-                delta_vx = self.drone5_location['velocity'][-1]['x'] - self.drone5_location['velocity'][-2]['x']
-                delta_vy = self.drone5_location['velocity'][-1]['y'] - self.drone5_location['velocity'][-2]['y']
-                delta_vz = self.drone5_location['velocity'][-1]['z'] - self.drone5_location['velocity'][-2]['z']
-                acceleration_x = delta_vx / elapsed_time
-                acceleration_y = delta_vy / elapsed_time
-                acceleration_z = delta_vz / elapsed_time
-                self.drone5_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
-        
         self.drone5_location['th'] = msg.pose.pose.orientation.z
         self.drone5_location['x_history'].append(self.drone5_location['x'])
         self.drone5_location['y_history'].append(self.drone5_location['y'])
         self.drone5_location['z_history'].append(self.drone5_location['z'])
         self.drone5_location['th_history'].append(self.drone5_location['th'])
+        current_time = msg.header.stamp.sec + 1e-9 * msg.header.stamp.nanosec
+        elapsed_time = current_time = self.drone5_location['time']
+        self.drone5_location['time'] = current_time
+        if len(self.drone5_location['x_history']) > 0:
+            delta_x = self.drone5_location['x'] - self.drone5_location['x_history'][-1]
+            delta_y = self.drone5_location['y'] - self.drone5_location['y_history'][-1]
+            delta_z = self.drone5_location['z'] - self.drone5_location['z_history'][-1]
+            if elapsed_time > 0:
+                velocity_x = delta_x / elapsed_time
+                velocity_y = delta_y / elapsed_time
+                velocity_z = delta_z / elapsed_time
+            else :
+                velocity_x = self.drone5_location['speed']
+                velocity_y = self.drone5_location['speed']
+                velocity_z = self.drone5_location['speed']
+            self.drone5_location['velocity_x'].append(float(velocity_x))
+            self.drone5_location['velocity_y'].append(float(velocity_y))
+            self.drone5_location['velocity_z'].append(float(velocity_z))
+            self.drone5_location['velocity'].append({'x': velocity_x, 'y': velocity_y, 'z': velocity_z})
+            if len(self.drone5_location['velocity']) > 1:
+                delta_vx = self.drone5_location['velocity'][-1]['x'] - self.drone5_location['velocity'][-2]['x']
+                delta_vy = self.drone5_location['velocity'][-1]['y'] - self.drone5_location['velocity'][-2]['y']
+                delta_vz = self.drone5_location['velocity'][-1]['z'] - self.drone5_location['velocity'][-2]['z']
+                acceleration_x = delta_vx / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_y = delta_vy / elapsed_time if elapsed_time != 0 else self.speed
+                acceleration_z = delta_vz / elapsed_time if elapsed_time != 0 else self.speed
+                self.drone5_location['acceleration_x'].append(float(acceleration_x))
+                self.drone5_location['acceleration_y'].append(float(acceleration_y))
+                self.drone5_location['acceleration_z'].append(float(acceleration_z))
+                self.drone5_location['acceleration'].append({'x': acceleration_x, 'y': acceleration_y, 'z': acceleration_z})
+            else:
+                self.drone5_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+                self.drone5_location['acceleration_x'].append(self.speed)
+                self.drone5_location['acceleration_y'].append(self.speed)
+                self.drone5_location['acceleration_z'].append(self.speed)
+        else:
+            self.drone5_location['velocity_x'].append(self.speed)
+            self.drone5_location['velocity_y'].append(self.speed)
+            self.drone5_location['velocity_z'].append(self.speed)
+            self.drone5_location['velocity'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
+            self.drone5_location['acceleration_x'].append(0.0)
+            self.drone5_location['acceleration_y'].append(0.0)
+            self.drone5_location['acceleration_z'].append(0.0)
+            self.drone5_location['acceleration'].append({'x': self.speed, 'y': self.speed, 'z': self.speed})
         self.calculate_uwb(5)
 
     def pose_callback1(self, msg):
