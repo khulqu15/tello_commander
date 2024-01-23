@@ -13,7 +13,7 @@ def main(drone_id):
         tello.move_right(100)
     elif drone_id == 2:
         tello.move_right(150)
-        tello.move_up(20)
+        tello.move_down(20)
         tello.move_right(100)
     else:
         print("Invalid drone id")
