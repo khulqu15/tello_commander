@@ -1,0 +1,51 @@
+python tello_coba.py
+[INFO] tello.py - 129 - Tello instance was initialized. Host: '192.168.10.1'. Port: '8889'.
+[INFO] tello.py - 438 - Send command: 'command'
+[ERROR] tello.py - 458 - 'utf-8' codec can't decode byte 0xcc in position 0: invalid continuation byte
+[INFO] tello.py - 438 - Send command: 'command'
+[INFO] tello.py - 462 - Response command: 'ok'
+[INFO] tello.py - 438 - Send command: 'takeoff'
+[INFO] tello.py - 462 - Response takeoff: 'ok'
+[INFO] tello.py - 438 - Send command: 'forward 100'
+[INFO] tello.py - 462 - Response forward 100: 'error Motor stop'
+[INFO] tello.py - 438 - Send command: 'forward 100'
+[INFO] tello.py - 462 - Response forward 100: 'error Not joystick'
+[INFO] tello.py - 438 - Send command: 'forward 100'
+[INFO] tello.py - 462 - Response forward 100: 'error Not joystick'
+Traceback (most recent call last):
+  File "E:\DJI_Tello\tello_coba.py", line 6, in <module>
+    tello.move_forward(100)
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\enforce_types.py", line 54, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\tello.py", line 656, in move_forward
+    self.move("forward", x)
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\enforce_types.py", line 54, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\tello.py", line 621, in move
+    self.send_control_command("{} {}".format(direction, x))
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\enforce_types.py", line 54, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\tello.py", line 487, in send_control_command
+    self.raise_result_error(command, response)
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\enforce_types.py", line 54, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\tello.py", line 529, in raise_result_error
+    raise TelloException("Command '{}' was unsuccessful for {} tries. Latest response:\t'{}'"
+djitellopy.tello.TelloException: Command 'forward 100' was unsuccessful for 4 tries. Latest response:   'error Not joystick'
+Exception ignored in: <function Tello.__del__ at 0x000001DB603BC540>
+Traceback (most recent call last):
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\enforce_types.py", line 54, in wrapper
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\tello.py", line 1028, in __del__
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\enforce_types.py", line 54, in wrapper
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\tello.py", line 1014, in end
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\enforce_types.py", line 54, in wrapper
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\tello.py", line 581, in land
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\enforce_types.py", line 54, in wrapper
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\tello.py", line 480, in send_control_command
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\enforce_types.py", line 54, in wrapper
+  File "C:\Users\User\AppData\Local\Programs\Python\Python312\Lib\site-packages\djitellopy\tello.py", line 436, in send_command_with_return       
+OSError: [WinError 6] The handle is invalid
