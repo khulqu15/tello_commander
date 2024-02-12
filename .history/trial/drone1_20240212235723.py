@@ -35,6 +35,7 @@ if int(case) == 1 or int(case) == 2 or int(case) == 4:
     tello.move_forward(140)
     x_pos = 140
     upload()
+    time.sleep(2)
 
     tello.move_right(180)
     y_pos = 180

@@ -21,9 +21,9 @@ yaw_pos = 0.0
 
 def upload():
     coordinate = str(x_pos)+","+str(y_pos)+","+str(z_pos)+","+str(roll_pos)+","+str(pitch_pos)+","+str(yaw_pos)
-    data = database.child("menu").child("tello").child("data").child("drone1").get()
+    data = database.child("menu").child("tello").child("data").child("drone2").get()
     index = len(data.val())
-    database.child("menu").child("tello").child("data").child("drone1").child(index).set(coordinate)
+    database.child("menu").child("tello").child("data").child("drone2").child(index).set(coordinate)
 
 tello = Tello()
 tello.connect()
@@ -35,19 +35,23 @@ if int(case) == 1 or int(case) == 2 or int(case) == 4:
     tello.move_forward(140)
     x_pos = 140
     upload()
+    time.sleep(2)
 
     tello.move_right(180)
     y_pos = 180
     upload()
     
+    time.sleep(2)
     tello.move_up(5)
     z_pos += 5
     upload()
     
+    time.sleep(2)
     tello.move_right(180)
     y_pos += 180
     upload()
 
+    time.sleep(2)
     tello.move_forward(140)
     x_pos += 140
     upload()
@@ -64,8 +68,8 @@ if int(case) == 3:
     upload()
     
     for i in range(360):
-        tello.move_forward(1)
-        tello.rotate_clockwise(1)
+        tello.move_forward(2)
+        tello.rotate_counter_clockwise(2)
         x_pos += math.cos(math.radians(i))
         x_pos += math.sin(math.radians(i))
         upload()
