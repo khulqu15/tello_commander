@@ -1,71 +1,60 @@
 % Jumlah drone
 nDrone = 15;
 
-% Membuat posisi awal dan target posisi secara dinamis
-% Menggunakan ruang 400x200 dengan ketinggian variatif
-posisi_awal = zeros(nDrone, 3);
-target_posisi = zeros(nDrone, 3);
-
-% Mengatur posisi awal dan target secara manual untuk demo
-for i = 1:nDrone
-    if mod(i, 3) == 0
-        posisi_awal(i, :) = [0, (i-1)*13.33, 150 + (i-1)*10];
-        target_posisi(i, :) = [400, 200 - (i-1)*13.33, 150 + (i-1)*5];
-    elseif mod(i, 3) == 1
-        posisi_awal(i, :) = [400, (i-1)*13.33, 150 + (i-1)*10];
-        target_posisi(i, :) = [0, 200 - (i-1)*13.33, 150 + (i-1)*5];
-    else
-        posisi_awal(i, :) = [200, (i-1)*13.33, 150 + (i-1)*10];
-        target_posisi(i, :) = [200, 200 - (i-1)*13.33, 150 + (i-1)*5];
-    end
-end
-
-dimensi_drone = 0.098;
-             
-% Jumlah iterasi simulasi
-n_iterasi = 100;
-
-% Parameter flocking
+% Parameter flocking dan kondisi awal
 dMin = 50; % Jarak minimal untuk penghindaran tabrakan
 vMax = 20; % Kecepatan maksimum drone
+adjustHeight = 20; % Ketinggian penyesuaian untuk menghindari tabrakan
 
-% Inisialisasi posisi dan kecepatan
+% Inisialisasi posisi, kecepatan, dan trayektori
 posisi = posisi_awal;
 kecepatan = zeros(nDrone,3);
-
-% Untuk menyimpan trayektori
-trayektori = zeros(n_iterasi, nDrone, 3);
-
 iterasi = 0;
-maxIterasi = 100; % Kondisi berhenti maksimum jika diperlukan
+maxIterasi = 100;
+
 while iterasi < maxIterasi
     iterasiDrone = 1;
     while iterasiDrone <= nDrone
         % Hitung vektor menuju target
         vTarget = (target_posisi(iterasiDrone,:) - posisi(iterasiDrone,:));
-        norm_vTarget = norm(vTarget);
+        norm_vTarget = norm(vTarget(1:2)); % Norm horizontal
         if norm_vTarget > 0
-            vTarget = vTarget / norm_vTarget * vMax;
+            vTarget(1:2) = vTarget(1:2) / norm_vTarget * vMax;
         end
         
-        % Penghindaran tabrakan
+        % Inisialisasi penghindaran tabrakan
+        vAvoid = zeros(1,3);
+        droneToAvoid = 0;
+        
         j = 1;
         while j <= nDrone
             if iterasiDrone ~= j
-                jarak = norm(posisi(iterasiDrone,:) - posisi(j,:));
-                if jarak < dMin
-                    vAvoid = posisi(iterasiDrone,:) - posisi(j,:);
-                    norm_vAvoid = norm(vAvoid);
-                    if norm_vAvoid > 0
-                        vAvoid = vAvoid / norm_vAvoid * vMax;
-                        vTarget = vTarget + vAvoid;
+                jarak = norm(posisi(iterasiDrone,1:2) - posisi(j,1:2)); % Jarak horizontal
+                jarakZ = abs(posisi(iterasiDrone,3) - posisi(j,3)); % Jarak vertikal
+                
+                % Jika dalam jarak penghindaran dan vertikal lebih kecil dari batas
+                if jarak < dMin && jarakZ < adjustHeight
+                    % Tentukan apakah perlu naik atau turun
+                    if posisi(iterasiDrone,3) <= posisi(j,3)
+                        vAvoid(3) = vAvoid(3) - vMax; % Turun
+                    else
+                        vAvoid(3) = vAvoid(3) + vMax; % Naik
                     end
+                    droneToAvoid = droneToAvoid + 1;
                 end
             end
             j = j + 1;
         end
         
-        % Batasi kecepatan
+        % Rata-rata penghindaran jika ada lebih dari satu drone untuk dihindari
+        if droneToAvoid > 0
+            vAvoid(3) = vAvoid(3) / droneToAvoid;
+        end
+        
+        % Gabungkan vektor target dengan penghindaran
+        vTarget = vTarget + vAvoid;
+        
+        % Batasi kecepatan total
         if norm(vTarget) > vMax
             vTarget = vTarget / norm(vTarget) * vMax;
         end
@@ -77,11 +66,7 @@ while iterasi < maxIterasi
         iterasiDrone = iterasiDrone + 1;
     end
     
-    % Simpan trayektori
-    if iterasi+1 <= maxIterasi
-        trayektori(iterasi+1,:,:) = posisi;
-    end
-    
+    % Update iterasi dan kondisi simulasi
     iterasi = iterasi + 1;
 end
 
