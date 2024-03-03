@@ -31,7 +31,7 @@ allDronesAtTarget = false;
 
 dt = 0.1;
 
-while ~allDronesAtTarget && iterasi <= 100
+while ~allDronesAtTarget
     allDronesAtTarget = true; % Asumsikan semua drone di target hingga terbukti tidak
     for iterasiDrone = 1:nDrone
         % Menghitung akselerasi berdasarkan kecepatan target dan kecepatan saat ini
