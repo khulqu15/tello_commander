@@ -79,3 +79,41 @@ Drone dengan sumber daya terbatas atau baterai yang hampir habis mungkin diberi 
 ![Image Result](result.png.jpg)
 ### 15 Drone dengan penghindaran dengan cara mengatur kecepatan
 ![Image Result](15_drones.png.jpg)
+
+# Update: Persamaan Differensial
+## Persamaan Matematis
+Model dinamika drone bisa dinyatakan dengan persamaan diferensial berikut:
+
+### Persamaan Kecepatan
+${d\vec{v}/dt} = \vec{a}$
+
+dimana $\vec{v}$ adalah vector kecepatan drone dan $\vec{a}$ adalah vektor percepatan yang dihasilkan dari pengaruh target dan penghindaran tabrakan.
+
+### Persamaan Posisi
+${d\vec{p}/dt} = \vec{v}$
+
+dimana $\vec{p}$ adalah vector posisi drone
+
+Persamaan diferensial ini menunjukkan bahwa perubahan posisi $(d\vec{p}/dt)$ drone sebanding dengan kecepatannya $(\vec{v})$, dan perubahan kecepatan $(d\vec{v}/dt)$ sebanding dengan percepatannya $(\vec{a})$
+
+## Implementasi pada simulasi
+
+Percepatan $\vec{a}$ dihitung berdasarkan dua faktor: kecepatan menuju target dan kecepatan untuk menghindari tabrakan. Ini dilakukan melalui penggabungan vektor kecepatan menuju target `vTarget` dengan vektor penghindaran `vAvoid`, yang kemudian diatur kecepatannya agar tidak melebihi `vMax`.
+
+Integrasi Numerik (Metode Euler): Kita menggunakan metode Euler untuk mengintegrasikan persamaan diferensial secara numerik dengan langkah waktu $dt$. Ini berarti posisi dan kecepatan di-update pada setiap iterasi berdasarkan:
+
+$\vec{v}_{baru} = \vec{v} + \vec{a} . dt$
+
+$\vec{p}_{baru} = \vec{p} + \vec{a} . dt$
+
+Dari kode, persamaan diferensial eksplisit untuk pergerakan drone dapat dituliskan sebagai
+
+$\vec{a} = \alpha . (\vec{v}_{target} + \vec{v}_{avoid} - \vec{v})$
+
+Di mana $\alpha$ adalah faktor kelembaman yang menyesuaikan seberapa cepat drone merespons perubahan dalam vektor kecepatan target dan penghindaran.
+
+Persamaan posisi tidak secara langsung muncul dalam bentuk diferensial dalam kode tetapi dihitung menggunakan metode Euler dengan asumsi pergerakan linear selama $dt$:
+
+$\vec{p}_{baru} = \vec{p} + (\vec{v} + \alpha . (\vec{v}_{target} + \vec{v}_{avoid} - \vec{v})) . dt$
+
+pergerakan drone diatur oleh kecepatan linear dan percepatan yang dihasilkan dari kombinasi antara kecepatan menuju target dan upaya menghindari tabrakan. Ini menciptakan sistem dinamis yang kompleks ketika banyak drone berinteraksi dan berusaha mencapai target mereka sambil menghindari tabrakan dengan drone lain.
