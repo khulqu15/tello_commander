@@ -108,7 +108,7 @@ $\vec{p}_{baru} = \vec{p} + \vec{a} . dt$
 
 Dari kode, persamaan diferensial eksplisit untuk pergerakan drone dapat dituliskan sebagai
 
-$\vec{a} = \alpha . (\vec{v}_{target} + \vec{Vavoid} - \vec{v})$
+$\vec{a} = \alpha . (\vec{v}_{target} + {\vec{v}_{avoid}} - \vec{v})$
 
 Di mana $\alpha$ adalah faktor kelembaman yang menyesuaikan seberapa cepat drone merespons perubahan dalam vektor kecepatan target dan penghindaran.
 
