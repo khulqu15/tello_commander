@@ -108,12 +108,12 @@ $\vec{p}_{baru} = \vec{p} + \vec{a} . dt$
 
 Dari kode, persamaan diferensial eksplisit untuk pergerakan drone dapat dituliskan sebagai
 
-$\vec{a} = \alpha . (\vec{v}_{target} + {\vec{v}_{avoid}} - \vec{v})$
+$\vec{a} = \alpha . (\vec{Vtarget} + {\vec{Vavoid}} - \vec{v})$
 
 Di mana $\alpha$ adalah faktor kelembaman yang menyesuaikan seberapa cepat drone merespons perubahan dalam vektor kecepatan target dan penghindaran.
 
 Persamaan posisi tidak secara langsung muncul dalam bentuk diferensial dalam kode tetapi dihitung menggunakan metode Euler dengan asumsi pergerakan linear selama $dt$:
 
-$\vec{p}_{baru} = \vec{p} + (\vec{v} + \alpha . (\vec{v}_{target} + \vec{v}_{avoid} - \vec{v})) . dt$
+$\vec{p_j} = \vec{p} + (\vec{v} + \alpha . (\vec{Vtarget} + \vec{Vavoid} - \vec{v})) . dt$
 
 pergerakan drone diatur oleh kecepatan linear dan percepatan yang dihasilkan dari kombinasi antara kecepatan menuju target dan upaya menghindari tabrakan. Ini menciptakan sistem dinamis yang kompleks ketika banyak drone berinteraksi dan berusaha mencapai target mereka sambil menghindari tabrakan dengan drone lain.
