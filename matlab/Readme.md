@@ -117,3 +117,56 @@ Persamaan posisi tidak secara langsung muncul dalam bentuk diferensial dalam kod
 $\vec{p_j} = \vec{p} + (\vec{v} + \alpha . (\vec{Vtarget} + \vec{Vavoid} - \vec{v})) . dt$
 
 pergerakan drone diatur oleh kecepatan linear dan percepatan yang dihasilkan dari kombinasi antara kecepatan menuju target dan upaya menghindari tabrakan. Ini menciptakan sistem dinamis yang kompleks ketika banyak drone berinteraksi dan berusaha mencapai target mereka sambil menghindari tabrakan dengan drone lain.
+
+
+# Update: Prediksi, Plotting Kecepatan dan Revisi nilai Alpha
+## Perhitungan nilai alpha
+Untuk mendapatkan nilai $\alpha$ yang merupakan faktor kelembaman dengan mempertimbangkan massa dan gravitasi, serta untuk mendapatkan nilai prediksi penghindaran drone, kita menggunakan beberapa persamaan matematis.
+
+$a = k(g/m)$
+
+dimana $k$ adalah konstanta responsivitas drone, $g$ adalah gravitasi bumi $(9.8m/s^2)$ dan $m$ adalah massa drone $1kg$
+
+Tujuan dari $\alpha$ adalah untuk mengatur seberapa cepat drone menyesuaikan kecepatannya menuju target atau menghindari halangan, dengan memperhitungkan efek gravitasi dan massa drone itu sendiri.
+
+## Persamaan untuk Prediksi Penghindaran Drone
+Prediksi penghindaran drone, terutama untuk menentukan waktu dan titik tabrakan potensial antara dua drone, dapat dihitung menggunakan vektor posisi relatif dan vektor kecepatan relatif. Kita asumsikan dua drone memiliki posisi $\vec{p_1}$ dan $\vec{p_2}$ serta kecepatan $\vec{v_1}$ dan $\vec{v_2}$ Waktu $t$ untuk tabrakan potensial dapat dihitung sebagai:
+
+$t = -(\vec{p_2} - \vec{p_1}) . (\vec{v_2} - \vec{v_1}) / ||\vec{v_2} - \vec{v_1}||^2$
+
+Titik tabrakan potensial $\vec{p}$ pada waktu $t$ dapat dihitung dengan:
+
+$\vec{p} = \vec{p_1} + \vec{v_1}. t $
+
+Jika $t$ bernilai positif dan kurang dari interval waktu simulasi, maka terdapat potensi tabrakan, dan titik $\vec{p}$ menunjukkan lokasi tabrakan tersebut.
+
+## berapa target waktu awal drone berangkat sampai tiba di target, dan setelah diaplikasikan algoritma yang digunakan berapa waktunya ? apakah ada perbedaan ?
+Untuk menentukan target waktu awal drone berangkat sampai tiba di target, serta membandingkannya dengan waktu setelah algoritma yang digunakan diterapkan, kita perlu memahami beberapa aspek:
+
+Target waktu awal dapat dihitung berdasarkan jarak awal ke target dan kecepatan maksimum drone, asumsikan pergerakan linear tanpa hambatan. Jika jarak total dari posisi awal ke target adalah $d$ dan kecepatan maksimum drone adalah $v_{max}$, waktu awal $(t_{awal})$ yang dibutuhkan dapat dihitung dengan:
+
+$t_{awal} = d / v_{max}$
+
+Untuk menentukan ini, kita perlu melacak waktu simulasi yang dibutuhkan dari awal hingga semua drone mencapai target mereka, dengan memperhitungkan penghindaran tabrakan dan perubahan rute. Waktu ini secara langsung tercatat melalui iterasi simulasi, dimana setiap iterasi mewakili step waktu $(dt)$.
+
+Perbedaan waktu antara $t_{awal}$ dan waktu setelah aplikasi algoritma mengindikasikan pengaruh dari penghindaran tabrakan dan navigasi pada efisiensi waktu perjalanan.
+
+Untuk menganalisis secara eksplisit menggunakan kode, kita perlu pertama-tama menghitung $t_{awal}$ untuk setiap drone berdasarkan posisi awal dan targetnya, kemudian membandingkannya dengan waktu yang dihasilkan dari simulasi setelah menerapkan algoritma penghindaran tabrakan.
+
+Sebagai contoh, jika kita memiliki data simulasi yang lengkap, hal yang perlu dilakukan yakni melakukan perhitungan sederhana untuk target waktu awal seperti di atas, lalu membandingkannya dengan $iterasi×dt$ untuk mendapatkan waktu akhir setelah aplikasi algoritma. Kita asumsikan $dt=0.05$ detik per iterasi dan iterasi total adalah jumlah loop yang dijalankan sampai semua drone mencapai target.
+
+```
+% Contoh penghitungan waktu awal (sederhana dan teoretis)
+d = norm(posisi_awal(1, :) - target_posisi(1, :)); % Jarak untuk drone 1
+v_max = 20; % Kecepatan maksimum
+t_awal = d / v_max;
+
+% Waktu setelah aplikasi algoritma
+iterasi_total = iterasi; % Nilai iterasi ketika semua drone mencapai target
+dt = 0.05; % Delta waktu per iterasi
+t_akhir = iterasi_total * dt;
+
+% Perbedaan
+perbedaan_waktu = t_akhir - t_awal;
+
+```
