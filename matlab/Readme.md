@@ -119,7 +119,7 @@ $\vec{p_j} = \vec{p} + (\vec{v} + \alpha . (\vec{Vtarget} + \vec{Vavoid} - \vec{
 pergerakan drone diatur oleh kecepatan linear dan percepatan yang dihasilkan dari kombinasi antara kecepatan menuju target dan upaya menghindari tabrakan. Ini menciptakan sistem dinamis yang kompleks ketika banyak drone berinteraksi dan berusaha mencapai target mereka sambil menghindari tabrakan dengan drone lain.
 
 
-# Update: Prediksi, Plotting Kecepatan dan Revisi nilai Alpha
+# Prediksi, Plotting Kecepatan dan Revisi nilai Alpha
 ## Perhitungan nilai alpha
 Untuk mendapatkan nilai $\alpha$ yang merupakan faktor kelembaman dengan mempertimbangkan massa dan gravitasi, serta untuk mendapatkan nilai prediksi penghindaran drone, kita menggunakan beberapa persamaan matematis.
 
@@ -170,3 +170,41 @@ t_akhir = iterasi_total * dt;
 perbedaan_waktu = t_akhir - t_awal;
 
 ```
+
+# Update
+## Collision Detection
+### Penyesuaian Kecepatan (vTarget)
+Persamaan ini digunakan untuk menghitung vektor kecepatan target berdasarkan posisi target dan posisi saat ini, dengan memperhitungkan faktor alpha untuk menyesuaikan akselerasi drone.
+
+$$ vTarget = (targetPosisi - posisi) * \alpha $$
+
+### Deteksi Tabrakan (predictionCollision)
+Menggunakan prediksi posisi masa depan dari dua drone berdasarkan kecepatan dan posisi saat ini untuk menentukan apakah mereka akan berada dalam jarak dMin satu sama lain, yang menandakan potensi tabrakan.
+
+$$ isCollision = || (pos1 + vel1 * dt) - (pos2 + vel2 * dt) || < dMin $$
+
+### Penghindaran Tabrakan (avoidCollision)
+Jika terdeteksi potensi tabrakan, vektor kecepatan baru dihitung untuk menghindari tabrakan. Ini dilakukan dengan menghitung vektor dari posisi saat ini ke posisi penghindaran, yang diarahkan menjauh dari drone lain. Kecepatan maksimum (vMax) kemudian diterapkan ke arah ini.
+
+$$ avoidDir = normalize(currentPos - obstaclePos) $$
+$$ vAvoid = avoidDir x vMax $$
+
+## Perbedaan Collision Detection Algorithm dan Flocking Algorithm untuk Collision Detection
+Collision Detection dan Flocking Algorithm adalah dua konsep penting dalam simulasi gerakan objek, seperti drone atau burung dalam kawanan. Masing-masing memiliki tujuan, pendekatan, dan persamaan yang berbeda. Mari kita jelajahi perbedaannya secara lebih rinci. Collision detection biasanya melibatkan perhitungan jarak antar objek dan perbandingannya dengan jarak minimum yang diizinkan (dMin). Jika jarak antara dua objek kurang dari dMin, maka dianggap bahwa potensi tabrakan terdeteksi.
+
+### Collision Detection
+Tujuan utama dari collision detection adalah untuk mengidentifikasi potensi tabrakan antar objek dalam simulasi dan mencegahnya terjadi. Dalam konteks drone, ini berarti mengidentifikasi ketika dua atau lebih drone berada dalam jarak tertentu satu sama lain dan mengambil tindakan untuk menghindari tabrakan.
+
+$$ isCollision = normalize(pos1 - pos2) < dMin $$
+
+### Flocking Algorithm
+Tujuan dari flocking algorithm adalah untuk mensimulasikan perilaku alami kawanan, seperti yang terlihat pada burung atau ikan. Dalam konteks drone, ini berarti mengoordinasikan gerakan beberapa drone sehingga mereka bergerak secara harmonis sebagai satu kelompok, meniru perilaku kawanan.
+Flocking algorithm biasanya melibatkan tiga aturan dasar: separation (mencegah tabrakan antar anggota kawanan dengan menjaga jarak minimum), alignment (menyesuaikan kecepatan setiap anggota kawanan dengan kecepatan rata-rata kawanan), dan cohesion (menggerakkan anggota kawanan menuju posisi rata-rata kawanan untuk menjaga kelompok tetap bersatu).
+
+$$ vSeparation = \sum_{i=1}^n (pos[i-1] - pos[i]) $$
+$$ vAlignment = 1/n \sum_{i=1}^n vel[i] $$
+$$ vCohesion = 1/n \sum_{i=1}^n pos[i-1] - pos[i] $$
+
+1. Collision detection berfokus pada mencegah tabrakan, sedangkan flocking algorithm berfokus pada simulasi perilaku kawanan yang koheren.
+2. Collision detection menggunakan pendekatan deteksi dan respons terhadap ancaman tabrakan, sedangkan flocking algorithm menggunakan kombinasi aturan perilaku untuk menciptakan gerakan yang terkoordinasi.
+3. Collision detection melibatkan perhitungan jarak untuk deteksi tabrakan, sedangkan flocking algorithm menggunakan serangkaian aturan dan persamaan untuk mengatur dinamika kelompok.
