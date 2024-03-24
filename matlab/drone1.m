@@ -8,7 +8,11 @@ k = 0.1;
 
 alpha = k * (gravitasi / massa);
 targetTolerance = 10.0;
-distanceDirectly = zeros(1, nDrone);
+
+jarakAsli = zeros(1, nDrone);
+jarakMenghindari = zeros(1, nDrone);
+waktuAsli = zeros(1, nDrone);
+waktuMenghindari = zeros(1, nDrone);
 
 magnitudoKecepatanHistory = zeros(1000, nDrone);
 waktuSampaiTujuan = zeros(1, nDrone);
@@ -16,7 +20,7 @@ waktuSampaiTujuan = zeros(1, nDrone);
 posisi_awal = zeros(nDrone, 3);
 target_posisi = zeros(nDrone, 3);
 for i = 1:nDrone
-    distanceDirectly(i) = norm(target_posisi(i, :) - posisi_awal(i, :));
+    jarakAsli(i) = norm(target_posisi(i,:) - posisi_awal(i,:));
     if mod(i, 3) == 0
         posisi_awal(i, :) = [0, (i-1)*13.33, 150 + (i-1)*10];
         target_posisi(i, :) = [400, 200 - (i-1)*13.33, 150 + (i-1)*5];
@@ -63,6 +67,8 @@ while ~allDronesAtTarget
         if norm(vTarget(1:2)) < dMin && posisi(iterasiDrone,3) > target_posisi(iterasiDrone,3)
             vTarget(3) = -(min(vMax, abs(vTarget(3))) / 2);
         end
+
+        jarakMenghindari(i) = jarakMenghindari(i) + norm(vTarget * dt);
         
         vAvoid = zeros(1,3);
         for j = 1:nDrone
@@ -95,8 +101,19 @@ while ~allDronesAtTarget
             waktuSampaiTujuan(i) = iterasiDrone * dt;
         end
     end
+    if iterasi == 1
+        for i = 1:nDrone
+            perbedaanJarak = jarakMenghindari(i) - jarakAsli(i);
+            text(posisi_awal(i,1), posisi_awal(i,2), posisi_awal(i,3), ...
+                 sprintf('Drone %d: ΔJarak = %.2f m, ΔWaktu = %.2f s', i, perbedaanJarak, waktuMenghindari(i) - waktuAsli(i)), ...
+                 'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right');
+        end
+    end
     iterasi = iterasi + 1;
 end
+
+waktuAsli = jarakAsli / vMax;
+waktuMenghindari = iterasi * dt;
 
 videoFile = 'drone_simulation_5_with_paths.avi';
 v = VideoWriter(videoFile);
@@ -123,9 +140,12 @@ for iterasiFrame = 1:iterasi-1
 
     subplot(4, nDrone, 1:nDrone*2);
     hold on;
-    view(3);
+    view(100, 0);
     grid on;
     axis equal;
+    xlabel('X');
+    ylabel('Y');
+    zlabel('Z');
     colors = lines(nDrone);
     for i = 1:nDrone-1
         for j = i+1:nDrone
@@ -134,6 +154,15 @@ for iterasiFrame = 1:iterasi-1
                 collisionTime = t;
                 collisionPoint = p;
             end
+        end
+    end
+
+    if iterasiFrame == iterasi 
+        for i = 1:nDrone
+            perbedaanJarak = jarakMenghindari(i) - jarakAsli(i);
+            text(posisi(i,1), posisi(i,2), posisi(i,3) + adjustHeight, ...
+                sprintf('Drone %d: ΔJarak = %.2f m, ΔWaktu = %.2f s', i, perbedaanJarak, waktuMenghindari - waktuAsli(i)), ...
+                'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'right');
         end
     end
 
@@ -152,7 +181,7 @@ for iterasiFrame = 1:iterasi-1
         text(posisi(i,1), posisi(i,2), posisi(i,3) + adjustHeight, sprintf('Drone %d', i), 'FontSize', 10);
         
         quiver3(posisi(i,1), posisi(i,2), posisi(i,3), kecepatan(i,1), kecepatan(i,2), kecepatan(i,3), 'Color', colors(i,:));
-
+        plot3(posisi(i,1), posisi(i,2), posisi(i,3), 'o', 'MarkerSize', 10, 'MarkerFaceColor', colors(i,:));
         plot3([posisi_awal(i,1), target_posisi(i,1)], [posisi_awal(i,2), target_posisi(i,2)], [posisi_awal(i,3), target_posisi(i,3)], '--', 'Color', colors(i,:), 'LineWidth', 1);
         plot3(squeeze(trayektori(1:iterasiFrame,i,1)), squeeze(trayektori(1:iterasiFrame,i,2)), squeeze(trayektori(1:iterasiFrame,i,3)), 'Color', colors(i,:), 'LineWidth', 2);
         plot3(trayektori(iterasiFrame,i,1), trayektori(iterasiFrame,i,2), trayektori(iterasiFrame,i,3), 'o', 'Color', colors(i,:), 'MarkerFaceColor', colors(i,:));
