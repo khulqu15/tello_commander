@@ -16,7 +16,7 @@ waktuSampaiTujuan = zeros(1, nDrone);
 posisi_awal = zeros(nDrone, 3);
 target_posisi = zeros(nDrone, 3);
 for i = 1:nDrone
-    distanceDirectly(iterasiDrone) = norm(target_posisi(iterasiDrone, :) - posisi_awal(iterasiDrone, :));
+    distanceDirectly(i) = norm(target_posisi(i, :) - posisi_awal(i, :));
     if mod(i, 3) == 0
         posisi_awal(i, :) = [0, (i-1)*13.33, 150 + (i-1)*10];
         target_posisi(i, :) = [400, 200 - (i-1)*13.33, 150 + (i-1)*5];
@@ -47,7 +47,7 @@ while ~allDronesAtTarget
         
         kecepatan(iterasiDrone,:) = kecepatan(iterasiDrone,:) + a * dt;
         kecepatan_data(iterasiDrone,:) = max(1, min(5, abs(kecepatan(iterasiDrone,:)))) .* sign(kecepatan(iterasiDrone,:));
-        magnitudoKecepatanHistory(iterasiFrame, i) = norm(kecepatan(iterasiDrone, :));
+        magnitudoKecepatanHistory(iterasiDrone, iterasiDrone) = norm(kecepatan(iterasiDrone, :));
         
         if norm(kecepatan(iterasiDrone,:)) > vMax
             kecepatan(iterasiDrone,:) = kecepatan(iterasiDrone,:) / norm(kecepatan(iterasiDrone,:)) * vMax;
@@ -92,7 +92,7 @@ while ~allDronesAtTarget
         if norm(posisi(iterasiDrone,:) - target_posisi(iterasiDrone,:)) >= targetTolerance
             allDronesAtTarget = false;
             kecepatan(iterasiDrone,:) = [0, 0, 0];
-            waktuSampaiTujuan(i) = iterasiFrame * dt;
+            waktuSampaiTujuan(i) = iterasiDrone * dt;
         end
     end
     iterasi = iterasi + 1;
@@ -213,7 +213,7 @@ end
 close(v);
 disp(['Video saved to ', videoFile]);
 
-posisiKecepatanFilename = 'posisi_dan_kecepatan_history.csv';
+posisiKecepatanFilename = 'flocking_algorithm.csv';
 csvwrite(posisiKecepatanFilename, dataHistory);
 disp(['Data posisi dan kecepatan disimpan ke ', posisiKecepatanFilename]);
 

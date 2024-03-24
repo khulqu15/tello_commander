@@ -31,8 +31,17 @@ function collision()
     dt = 0.05;
     iterasi = 1;
     allDronesAtTarget = false;
+    
+    angle_x = 30;
+    angle_y = 45;
 
-    figure;
+    videoFile = sprintf('collision_detection_y-%d_x-%d.avi', angle_y, angle_x);
+    v = VideoWriter(videoFile);
+    
+    open(v);
+    
+    figSimulasi = figure('Name', 'Simulasi Drone', 'Position', [100, 100, 1200, 600]);
+
     hold on;
     grid on;
     axis equal;
@@ -41,68 +50,70 @@ function collision()
     zlabel('Z');
     xlim([min(posisi_awal(:,1))-100, max(target_posisi(:,1))+100]);
     ylim([min(posisi_awal(:,2))-100, max(target_posisi(:,2))+100]);
-    zlim([0, max(posisi_awal(:,3))+200]);
+    zlim([0, max(posisi_awal(:,3))+200]);    
 
-while ~allDronesAtTarget
-    clf;
-    hold on;
-    grid on;
-    axis equal;
-    xlabel('X');
-    ylabel('Y');
-    view(3);
-    zlabel('Z');
-    xlim([min(posisi_awal(:,1))-100, max(target_posisi(:,1))+100]);
-    ylim([min(posisi_awal(:,2))-100, max(target_posisi(:,2))+100]);
-    zlim([0, max(posisi_awal(:,3))+200]);
-
-    allDronesAtTarget = true;
-    for i = 1:nDrone
-        vTarget = (target_posisi(i,:) - posisi(i,:)) * alpha;
-        [vTarget, isAtTarget] = updateDronePosition(posisi(i,:), target_posisi(i,:), vMax, dt);
-        kecepatan(i,:) = vTarget;
-        posisi(i,:) = posisi(i,:) + vTarget * dt;
-        for j = 1:nDrone
-
-            [collisionTime, collisionPoint] = predictCollisionTimeAndPoint(posisi(i,:), kecepatan(i,:), posisi(j,:), kecepatan(j,:), dMin);
-            if ~isinf(collisionTime)
-                plot3(collisionPoint(1), collisionPoint(2), collisionPoint(3), 'x', 'MarkerSize', 10, 'Color', 'red');
-                text(collisionPoint(1), collisionPoint(2), collisionPoint(3)+100, sprintf('T-%0.2fs', collisionTime), 'Color', 'red');
-            end
-            
-            if j ~= i
-                [isCollision, timeToCollision, collisionPoint] = predictCollision(posisi(i,:), kecepatan(i,:), posisi(j,:), kecepatan(j,:), dt, dMin);
-                if isCollision && timeToCollision <= dt
-                    vTarget = avoidCollision(posisi(i,:), target_posisi(i,:), posisi(j,:));
-                    plot3(collisionPoint(1), collisionPoint(2), collisionPoint(3), 'x', 'MarkerSize', 10, 'MarkerEdgeColor', 'r');
-                    text(collisionPoint(1), collisionPoint(2), collisionPoint(3)+5, sprintf('%.2f s', timeToCollision), 'Color', 'red');
-                    break;
+    while ~allDronesAtTarget
+        clf;
+        hold on;
+        grid on;
+        view(40, 45);
+        axis equal;
+        xlabel('X');
+        ylabel('Y');
+        zlabel('Z');
+        xlim([min(posisi_awal(:,1))-100, max(target_posisi(:,1))+100]);
+        ylim([min(posisi_awal(:,2))-100, max(target_posisi(:,2))+100]);
+        zlim([0, max(posisi_awal(:,3))+200]);
+    
+        allDronesAtTarget = true;
+        for i = 1:nDrone
+            vTarget = (target_posisi(i,:) - posisi(i,:)) * alpha;
+            [vTarget, isAtTarget] = updateDronePosition(posisi(i,:), target_posisi(i,:), vMax, dt);
+            kecepatan(i,:) = vTarget;
+            posisi(i,:) = posisi(i,:) + vTarget * dt;
+            for j = 1:nDrone
+    
+                [collisionTime, collisionPoint] = predictCollisionTimeAndPoint(posisi(i,:), kecepatan(i,:), posisi(j,:), kecepatan(j,:), dMin);
+                if ~isinf(collisionTime)
+                    plot3(collisionPoint(1), collisionPoint(2), collisionPoint(3), 'x', 'MarkerSize', 10, 'Color', 'red');
+                    text(collisionPoint(1), collisionPoint(2), collisionPoint(3)+((j+1) * 10), sprintf('T-%0.2fs', collisionTime), 'Color', 'red');
+                end
+                
+                if j ~= i
+                    [isCollision, timeToCollision, collisionPoint] = predictCollision(posisi(i,:), kecepatan(i,:), posisi(j,:), kecepatan(j,:), dt, dMin);
+                    if isCollision && timeToCollision <= dt
+                        vTarget = avoidCollision(posisi(i,:), target_posisi(i,:), posisi(j,:));
+                        plot3(collisionPoint(1), collisionPoint(2), collisionPoint(3), 'x', 'MarkerSize', 10, 'MarkerEdgeColor', 'r');
+                        text(collisionPoint(1), collisionPoint(2), collisionPoint(3)+(j * 30), sprintf('%.2f s', timeToCollision), 'Color', 'red');
+                        break;
+                    end
                 end
             end
+            plotDronePath(posisi_awal(i,:), target_posisi(i,:));
+    
+            kecepatan(i,:) = kecepatan(i,:) + vTarget * dt;
+            if norm(kecepatan(i,:)) > vMax
+                kecepatan(i,:) = kecepatan(i,:) / norm(kecepatan(i,:)) * vMax;
+            end
+    
+            posisi(i,:) = posisi(i,:) + kecepatan(i,:) * dt;
+            if norm(posisi(i,:) - target_posisi(i,:)) >= targetTolerance
+                allDronesAtTarget = false;
+            end
+    
+            plot3(posisi(i,1), posisi(i,2), posisi(i,3), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'b');
         end
-        plotDronePath(posisi_awal(i,:), target_posisi(i,:)); % Fungsi visualisasi lintasan drone
-
-        kecepatan(i,:) = kecepatan(i,:) + vTarget * dt;
-        if norm(kecepatan(i,:)) > vMax
-            kecepatan(i,:) = kecepatan(i,:) / norm(kecepatan(i,:)) * vMax;
-        end
-
-        posisi(i,:) = posisi(i,:) + kecepatan(i,:) * dt;
-        if norm(posisi(i,:) - target_posisi(i,:)) >= targetTolerance
-            allDronesAtTarget = false;
-        end
-
-        plot3(posisi(i,1), posisi(i,2), posisi(i,3), 'o', 'MarkerSize', 10, 'MarkerFaceColor', 'b');
-        % line([posisi_awal(i,1), target_posisi(i,1)], [posisi_awal(i,2), target_posisi(i,2)], [posisi_awal(i,3), target_posisi(i,3)], 'Color', 'red', 'LineStyle', '--');
+        drawnow;
+    
+        iterasi = iterasi + 1;
+        frame = getframe(figSimulasi);
+        writeVideo(v, frame);
     end
-
-    drawnow;
-
-    iterasi = iterasi + 1;
-end
-
-hold off;
-disp('Simulasi Selesai');
+    
+    hold off;
+    close(v);
+    disp(['Video saved to ', videoFile]);
+    disp('Simulasi Selesai');
 
 end
 
