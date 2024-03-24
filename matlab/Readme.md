@@ -208,3 +208,20 @@ $$ vCohesion = 1/n \sum_{i=1}^n pos[i-1] - pos[i] $$
 1. Collision detection berfokus pada mencegah tabrakan, sedangkan flocking algorithm berfokus pada simulasi perilaku kawanan yang koheren.
 2. Collision detection menggunakan pendekatan deteksi dan respons terhadap ancaman tabrakan, sedangkan flocking algorithm menggunakan kombinasi aturan perilaku untuk menciptakan gerakan yang terkoordinasi.
 3. Collision detection melibatkan perhitungan jarak untuk deteksi tabrakan, sedangkan flocking algorithm menggunakan serangkaian aturan dan persamaan untuk mengatur dinamika kelompok.
+
+## Collision Prediction Logic
+Prediksi tabrakan antara dua atau lebih drone melibatkan perhitungan titik dan waktu di mana dua lintasan (didefinisikan oleh posisi awal dan kecepatan drone) akan bertemu. Proses ini mengasumsikan bahwa kedua drone bergerak dengan lintasan linier, yang merupakan aproksimasi yang berguna untuk jangka waktu singkat dalam banyak skenario.
+
+Untuk memprediksi tabrakan, kita menggunakan posisi $(p1, p2)$ dan kecepatan $(v1, v2)$ dari dua drone. Kita ingin menemukan nilai $t$, waktu di masa depan, di mana jarak antara dua drone adalah minimum dan kurang dari atau sama dengan jarak minimum $d_{min}$
+Persamaan yang digunakan untuk menemukan waktu $t$ adalah:
+
+$$ at^2 + bt + c = 0 $$
+dimana:
+- $$ a = || v1 - v2 ||^2 $$
+- $$ b = 2(p1 - p2) * (v1 - v2) $$
+- $$ c = || p1 - p2 ||^2 - d^2_{min} $$
+
+Diskriminan dari persamaan kuadrat ini $$(b^2 - 4ac)$$ menentukan apakah solusi (yaitu, waktu tabrakan) ada. Jika diskriminan positif, maka ada dua solusi yang mungkin, dan solusi dengan nilai $t$ positif terkecil yang relevan bagi kita sebagai waktu tabrakan. Jika diskriminan negatif, maka tidak ada tabrakan yang diperkirakan.
+Setelah $t$ ditemukan, kita dapat menghitung koordinat tabrakan sebagai:
+
+$$ p_{collision} = p1 + v1 * t $$
