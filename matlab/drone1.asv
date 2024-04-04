@@ -22,13 +22,13 @@ target_posisi = zeros(nDrone, 3);
 for i = 1:nDrone
     jarakAsli(i) = norm(target_posisi(i,:) - posisi_awal(i,:));
     if mod(i, 3) == 0
-        posisi_awal(i, :) = [0, (i-1)*13.33, 0];
+        posisi_awal(i, :) = [0, (i-1)*13.33, 150 + (i-1)*10];
         target_posisi(i, :) = [200, 200, 150 + (i-1)*5];
     elseif mod(i, 3) == 1
-        posisi_awal(i, :) = [400, (i-1)*13.33, 0];
+        posisi_awal(i, :) = [400, (i-1)*13.33, 150 + (i-1)*10];
         target_posisi(i, :) = [200, 200, 150 + (i-1)*5];
     else
-        posisi_awal(i, :) = [200, (i-1)*13.33, 0];
+        posisi_awal(i, :) = [200, (i-1)*13.33, 150 + (i-1)*10];
         target_posisi(i, :) = [200, 200, 150 + (i-1)*5];
     end
 end
@@ -129,11 +129,6 @@ while ~allDronesAtTarget
         else
             allDronesAtTarget = false;
         end
-    end
-    if allDronesAtTarget
-        fprintf('Semua drone telah mencapai target pada iterasi ke-%d.\n', iterasi);
-        break;
-    end
     iterasi = iterasi + 1;
 end
 
