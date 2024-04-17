@@ -102,10 +102,10 @@ while ~allDronesAtTarget
         vNew = vTarget + vAvoid;
         kecepatan(iterasiDrone,:) = kecepatan(iterasiDrone,:) + vNew * alpha;
         
-        if landedDrone(iterasiDrone) == 0
+        % if landedDrone(iterasiDrone) == 0
             posisi(iterasiDrone,:) = posisi(iterasiDrone,:) + kecepatan(iterasiDrone,:) * dt;
             trayektori(iterasi, iterasiDrone, :) = posisi(iterasiDrone,:);
-        end
+        % end
 
         if jarakKeTargetHorizontal < targetTolerance
             kecepatan(iterasiDrone,:) = [0, 0, 0];
@@ -179,6 +179,7 @@ for iterasiFrame = 1:iterasi-1
     for iterasiDrone = 1:nDrone
         posisiSebelumnya = posisi(iterasiDrone,:);
         posisi(iterasiDrone,:) = posisi(iterasiDrone,:) + kecepatan(iterasiDrone,:) * dt;
+        trayektori(iterasi, iterasiDrone, :) = posisi(iterasiDrone,:);
         jarakTempuhIterasi = norm(posisi(iterasiDrone,:) - posisiSebelumnya);
         jarakTotalPathAsli(iterasiDrone) = jarakTotalPathAsli(iterasiDrone) + jarakTempuhIterasi;
         jarakTotalPathNormal(iterasiDrone) = norm(target_posisi(iterasiDrone,:) - posisi_awal(iterasiDrone,:));
@@ -222,7 +223,7 @@ for iterasiFrame = 1:iterasi-1
         plot3(collisionPoint(1), collisionPoint(2), (collisionPoint(3) + 5), 'x', 'Color', 'red', 'MarkerSize', 10, 'LineWidth', 2);
         text(collisionPoint(1), (collisionPoint(2) + 30), (collisionPoint(3) + 60) + 10, sprintf('Crash in %.2f s', collisionTime), 'FontSize', 10, 'Color', 'red');
     end
-
+    
     infoTextCells = arrayfun(@(idx) sprintf('Drone %d - Posisi: (%.2f, %.2f, %.2f), Kecepatan: (%.2f, %.2f, %.2f)', idx, posisi(idx,1), posisi(idx,2), posisi(idx,3), kecepatan(idx,1), kecepatan(idx,2), kecepatan(idx,3)), 1:nDrone, 'UniformOutput', false);
     for i = 1:nDrone
         jarakAsli(i) = norm(target_posisi(i,:) - posisi_awal(i,:));
@@ -235,7 +236,7 @@ for iterasiFrame = 1:iterasi-1
         infoTextCells{end+1} = additionalInfo;  % Menambahkan informasi ke array
     end
     infoText = strjoin(infoTextCells, '\n');
-    annotation(gcf, 'textbox', [0, 0.85, 1, 0.15], 'String', infoText, 'FontSize', 7, 'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'VerticalAlignment', 'bottom');
+    annotation(gcf, 'textbox', [0, 0.7, 1, 0.15], 'String', infoText, 'FontSize', 7, 'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'VerticalAlignment', 'bottom');
     
 
     for i = 1:nDrone
