@@ -1,4 +1,4 @@
-nDrone = 5; % Jumlah Drone
+nDrone = 12; % Jumlah Drone
 dMin = 1; % Minimal Jarak Toleransi
 vMax = 20; % Kecematan Maksimal
 adjustHeight = 20; % Ketinggian 
