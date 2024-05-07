@@ -88,9 +88,29 @@ decelerationRate = 0.5;
 landingQueue = 1:nDrone;
 currentlyLanding = 0;
 
+priorities = [5, 3, 2, 1, 4];
+landingPriorityQueue = zeros(1, nDrone);
+ETA = zeros(1, nDrone);
+%%
+
 while ~allDronesAtTarget
     allDronesAtTarget = true;
     fprintf("Iterasi ke %d", iterasi);
+
+    for i = 1:nDrone
+        if landedDrone(i) == 0
+            jarakKeTargetHorizontal = norm(target_posisi(i,1:2) - posisi(i,1:2));
+            if norm(kecepatan(i,:)) > 0
+                ETA(i) = jarakKeTargetHorizontal / norm(kecepatan(i,:));
+            else
+                ETA(i) = Inf;
+            end
+            priorities(i) = 1 / (jarakKeTargetHorizontal + 1) + 1 / (ETA(i) + 1);
+        end
+    end
+    [~, priorityIndices] = sort(priorities, 'descend');
+    %%
+    
     for iterasiDrone = 1:nDrone
         jarakKeTargetHorizontal = norm(target_posisi(iterasiDrone,1:2) - posisi(iterasiDrone,1:2));
         jarakKeTargetVertical = abs(target_posisi(iterasiDrone,3) - posisi(iterasiDrone,3));
@@ -116,7 +136,7 @@ while ~allDronesAtTarget
 
         vAvoid = zeros(1,3);
         for j = 1:nDrone
-            if iterasiDrone ~= j
+            if iterasiDrone ~= j  && priorities(iterasiDrone) >= priorities(j)
                 jarak = norm(posisi(iterasiDrone,1:2) - posisi(j,1:2));
                 if jarak < 2
                     collisionAvoidanceCounter(j) = collisionAvoidanceCounter(j) + 1;
@@ -124,7 +144,7 @@ while ~allDronesAtTarget
             end
         end
         for j = nDrone
-            if iterasiDrone ~= j
+            if iterasiDrone ~= j  && priorities(iterasiDrone) >= priorities(j)
                 jarak = norm(posisi(iterasiDrone,1:2) - posisi(j,1:2));
                 jarakZ = abs(posisi(iterasiDrone,3) - posisi(j,3));
                 if jarak < dMin
@@ -317,6 +337,33 @@ for iterasiFrame = 1:iterasi-1
     
     frameThresholds = initialThreshold:increment:(initialThreshold + increment * (nDrone - 1));
 
+    rateOfDescent = 0.2;  % Tingkat kecepatan penurunan yang aman
+
+    for i = 1:nDrone
+        for j = 1:nDrone
+            if i ~= j
+                pos_i = squeeze(trayektori(iterasiFrame, i, :));
+                pos_j = squeeze(trayektori(iterasiFrame, j, :));
+                distance = norm(pos_i(1:2) - pos_j(1:2));
+    
+                if distance < 20
+                    kecepatan(i,:) = kecepatan(i,:) * 0.9;
+                    trayektori(iterasiFrame, i, 3) = trayektori(iterasiFrame, i, 3) - (kecepatan(i, 3) * rateOfDescent);
+                elseif distance > safeDistance * 1.5
+                    directionToOtherDrone = (pos_j - pos_i) / norm(pos_j - pos_i);
+                    kecepatan(i,:) = kecepatan(i,3) + 0.1 * directionToOtherDrone;
+                end
+
+                if iterasiFrame > 2
+                    if trayektori(iterasiFrame, i, 3) < trayektori(iterasiFrame - 1, i, 3)
+                        kecepatan(i, 3) = kecepatan(i, 3) * 0.8;  % Menurunkan kecepatan vertikal
+                    end
+                end
+            end
+        end
+    end
+    
+
     for i = 1:nDrone
         
         kecepatanXHistory(iterasiFrame, i) = abs(kecepatan(i,1));
@@ -349,12 +396,6 @@ for iterasiFrame = 1:iterasi-1
     end
     
     for i = 1:nDrone
-        if iterasiFrame > 15 || trayektori(iterasiFrame, i, 3) < 100
-            kecepatan(i, 3) = 0;
-        end 
-        if iterasiFrame > 25
-            kecepatan(i, 3) = 0;
-        end
         magnitudoKecepatan = abs(kecepatan(i,3));
         magnitudoKecepatanHistory(iterasiFrame, i) = magnitudoKecepatan;
     end

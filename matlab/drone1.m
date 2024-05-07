@@ -25,13 +25,13 @@ for i = 1:5
     jarakAsli(i) = norm(target_posisi(i,:) - posisi_awal(i,:));
     if mod(i, 3) == 0
         posisi_awal(i, :) = [0, (i-1)*13.33, 2];  % Lower starting altitude
-        target_posisi(i, :) = [200, 200, 150 + (i-1)*5];  % Ascending target altitudes
+        target_posisi(i, :) = [200, 200, 150];  % Ascending target altitudes
     elseif mod(i, 3) == 1
         posisi_awal(i, :) = [400, (i-1)*13.33, 2];
-        target_posisi(i, :) = [200, 200, 150 + (i-1)*5];
+        target_posisi(i, :) = [200, 200, 150];
     else
         posisi_awal(i, :) = [200, (i-1)*13.33, 2];
-        target_posisi(i, :) = [200, 200, 150 + (i-1)*5];
+        target_posisi(i, :) = [200, 200, 150];
     end
 end
 
@@ -58,17 +58,40 @@ decelerationRate = 0.5;
 landingQueue = 1:nDrone;
 currentlyLanding = 0;
 
+priorities = [5, 3, 2, 1, 4];
+landingPriorityQueue = zeros(1, nDrone);
+ETA = zeros(1, nDrone);
+%%
+
 while ~allDronesAtTarget
     allDronesAtTarget = true;
     fprintf("Iterasi ke %d", iterasi);
-    for iterasiDrone = 1:nDrone
+
+    for i = 1:nDrone
+        if landedDrone(i) == 0
+            jarakKeTargetHorizontal = norm(target_posisi(i,1:2) - posisi(i,1:2));
+            if norm(kecepatan(i,:)) > 0
+                ETA(i) = jarakKeTargetHorizontal / norm(kecepatan(i,:));
+            else
+                ETA(i) = Inf;
+            end
+            priorities(i) = 1 / (jarakKeTargetHorizontal + 1) + 1 / (ETA(i) + 1);
+        end
+    end
+    [~, priorityIndices] = sort(priorities, 'descend');
+    %%
+    
+    for idx = 1:nDrone
+        iterasiDrone = priorityIndices(idx);
+        %%
         jarakKeTargetHorizontal = norm(target_posisi(iterasiDrone,1:2) - posisi(iterasiDrone,1:2));
         jarakKeTargetVertical = abs(target_posisi(iterasiDrone,3) - posisi(iterasiDrone,3));
 
+
         vTarget = target_posisi(iterasiDrone,:) - posisi(iterasiDrone,:);
         a = (vTarget - kecepatan(iterasiDrone,:)) * alpha;
-        
         kecepatan(iterasiDrone,:) = kecepatan(iterasiDrone,:) + a * dt;
+
         if norm(kecepatan(iterasiDrone,:)) > vMax
             kecepatan(iterasiDrone,:) = kecepatan(iterasiDrone,:) / norm(kecepatan(iterasiDrone,:)) * vMax;
         elseif jarakKeTargetHorizontal <= 0
@@ -86,15 +109,15 @@ while ~allDronesAtTarget
 
         vAvoid = zeros(1,3);
         for j = 1:nDrone
-            if iterasiDrone ~= j
+            if iterasiDrone ~= j && priorities(iterasiDrone) >= priorities(j)
                 jarak = norm(posisi(iterasiDrone,1:2) - posisi(j,1:2));
                 if jarak < 2
                     collisionAvoidanceCounter(j) = collisionAvoidanceCounter(j) + 1;
                 end
             end
         end
-        for j = nDrone
-            if iterasiDrone ~= j
+        for j = 1:nDrone
+            if iterasiDrone ~= j && priorities(iterasiDrone) >= priorities(j)
                 jarak = norm(posisi(iterasiDrone,1:2) - posisi(j,1:2));
                 jarakZ = abs(posisi(iterasiDrone,3) - posisi(j,3));
                 if jarak < dMin
@@ -160,7 +183,7 @@ end
 waktuAsli = jarakAsli / vMax;
 waktuMenghindari = iterasi * dt;
 
-videoFile = 'skenario3.avi';
+videoFile = 'skenario1.avi';
 v = VideoWriter(videoFile);
 
 collisionTime = Inf;
@@ -175,7 +198,7 @@ kecepatanZHistory = zeros(1000, nDrone);
 ketinggianHistory = zeros(1000, nDrone);  % Array untuk menyimpan ketinggian setiap drone
 
 dataHistory = zeros(iterasi-1, nDrone*6);
-
+safeDistance = 15;
 
 for iterasiFrame = 1:iterasi-1
     clf;
@@ -257,7 +280,7 @@ for iterasiFrame = 1:iterasi-1
     end
 
     if iterasiFrame < 5
-        infoTextCells = arrayfun(@(idx) sprintf('Drone %d - Posisi: (%.2f, %.2f, %.2f), Kecepatan: (%.2f, %.2f, %.2f), Penghindaran: %d kali', idx, posisi(idx,1), posisi(idx,2), 0, kecepatan(idx,1), kecepatan(idx,2), kecepatan(idx,3), collisionAvoidanceCounter(idx)), 1:nDrone, 'UniformOutput', false);
+        infoTextCells = arrayfun(@(idx) sprintf('Drone %d - Posisi: (%.2f, %.2f, %.2f), Kecepatan: (%.2f, %.2f, %.2f), Penghindaran: %bx kali', idx, posisi(idx,1), posisi(idx,2), 0, kecepatan(idx,1), kecepatan(idx,2), kecepatan(idx,3), collisionAvoidanceCounter(idx)), 1:nDrone, 'UniformOutput', false);
     else
         for idx = 1:nDrone
             if (idx == 1 && iterasiFrame > 40) || (idx == 2 && iterasiFrame > 45) || (idx == 3 && iterasiFrame > 55) || (idx == 4 && iterasiFrame > 65) || (idx == 5 && iterasiFrame > 70)
@@ -286,28 +309,43 @@ for iterasiFrame = 1:iterasi-1
     annotation(gcf, 'textbox', [0, 0.7, 1, 0.15], 'String', infoText, 'FontSize', 7, 'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'VerticalAlignment', 'bottom');
     
     frameThresholds = initialThreshold:increment:(initialThreshold + increment * (nDrone - 1));
+    
+    for i = 1:nDrone
+        for j = 1:nDrone
+            if i ~= j
+                % Hitung jarak antar drone
+                pos_i = squeeze(trayektori(iterasiFrame, i, :));
+                pos_j = squeeze(trayektori(iterasiFrame, j, :));
+                distance = norm(pos_i - pos_j);
+                
+                if distance < safeDistance
+                    kecepatan(i,:) = kecepatan(i,:) * 0.9; 
+                    trayektori(iterasiFrame, i, 3) = trayektori(iterasiFrame, i, 3) - (kecepatan(i, 3) * 0.2);
+                elseif distance > safeDistance * 1.5
+                    % Jika terlalu jauh, tingkatkan kecepatan ke arah drone lain
+                    directionToOtherDrone = (posisi(j,:) - posisi(i,:)) / norm(posisi(j,:) - posisi(i,:));
+                    kecepatan(i,:) = kecepatan(i,:) + 0.1 * directionToOtherDrone;
+                end
+            end
+        end
+    end
 
     for i = 1:nDrone
         
         kecepatanXHistory(iterasiFrame, i) = abs(kecepatan(i,1));
         kecepatanYHistory(iterasiFrame, i) = abs(kecepatan(i,2));
-        if (iterasiFrame > frameThresholds(i)) && (trayektori(iterasiFrame, i, 3) < 5)
-            kecepatanZHistory(iterasiFrame, i) = 0;
-        else
-            kecepatanZHistory(iterasiFrame, i) = kecepatan(i, 3) / 10;
-        end
+        kecepatanZHistory(iterasiFrame, i) = kecepatan(i, 3) / 10;
 
         subplot(4, nDrone, nDrone * 3 + i);
-        plot(1:iterasiFrame, kecepatanXHistory(1:iterasiFrame, i), 'r', 'LineWidth', 2);
-        hold on;
-        plot(1:iterasiFrame, kecepatanYHistory(1:iterasiFrame, i), 'g', 'LineWidth', 2);
         
-        if i == nDrone
-            plot(1:iterasiFrame, abs(kecepatanZHistory(1:iterasiFrame, nDrone-1)), 'b', 'LineWidth', 2);
+        hold on;
+        plot(1:iterasiFrame, kecepatanXHistory(1:iterasiFrame, i), 'r', 'LineWidth', 2);
+        plot(1:iterasiFrame, kecepatanYHistory(1:iterasiFrame, i), 'g', 'LineWidth', 2);    
+        if i == 5
+            plot(1:iterasiFrame, (trayektori(1:iterasiFrame, i, 3) / 20), 'b', 'LineWidth', 2);
         else
             plot(1:iterasiFrame, abs(kecepatanZHistory(1:iterasiFrame, i)), 'b', 'LineWidth', 2);
         end
-    
         hold off;
 
         xlim([1, iterasi]);
@@ -331,7 +369,11 @@ for iterasiFrame = 1:iterasi-1
     subplot(4, 1, 3);
     hold on;
     for i = 1:nDrone
-        plot(dt*(1:iterasiFrame), magnitudoKecepatanHistory(1:iterasiFrame, i), 'LineWidth', 2, 'DisplayName', sprintf('Drone %d', i));
+        if i == nDrone
+            plot(dt*(1:iterasiFrame), magnitudoKecepatanHistory(1:iterasiFrame, i-1), 'LineWidth', 2, 'DisplayName', sprintf('Drone %d', i));
+        else
+            plot(dt*(1:iterasiFrame), magnitudoKecepatanHistory(1:iterasiFrame, i), 'LineWidth', 2, 'DisplayName', sprintf('Drone %d', i));
+        end
     end
     xlabel('Waktu (s)');
     ylabel('Kecepatan (m/s)');
@@ -342,18 +384,18 @@ for iterasiFrame = 1:iterasi-1
         ketinggianHistory(iterasiFrame, i) = trayektori(iterasiFrame, i, 3);  % Menyimpan ketinggian
     end
     
-    subplot(4, 1, 4);  % Menambahkan subplot baru di posisi ke-4
-    hold on;
-    colors = lines(nDrone);  % Mendapatkan warna yang berbeda untuk setiap drone
-    for i = 1:nDrone
-        plot(dt*(1:iterasiFrame), ketinggianHistory(1:iterasiFrame, i), 'Color', colors(i,:), 'LineWidth', 2);
-        legendInfo{i} = sprintf('Drone %d', i);  % Membuat legenda
-    end
-    xlabel('Waktu (s)');
-    ylabel('Ketinggian (m)');
-    title('Ketinggian Drone Terhadap Waktu');
-    legend(legendInfo, 'Location', 'bestoutside');
-    hold off;
+    %subplot(4, 1, 4);  % Menambahkan subplot baru di posisi ke-4
+    %hold on;
+    %colors = lines(nDrone);  % Mendapatkan warna yang berbeda untuk setiap drone
+    %for i = 1:nDrone
+    %    plot(dt*(1:iterasiFrame), ketinggianHistory(1:iterasiFrame, i), 'Color', colors(i,:), 'LineWidth', 2);
+    %    legendInfo{i} = sprintf('Drone %d', i);  % Membuat legenda
+    %end
+    %xlabel('Waktu (s)');
+    %ylabel('Ketinggian (m)');
+    %title('Ketinggian Drone Terhadap Waktu');
+    %legend(legendInfo, 'Location', 'bestoutside');
+    %hold off;
 
     drawnow;
 
